@@ -1,0 +1,78 @@
+#!/bin/bash
+# $Id$
+
+dracut_modules() {
+	local add=() del=()
+
+	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
+	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
+
+	isTrue "${LVM}" && add+=(lvm) || del+=(lvm)
+	isTrue "${DMRAID}" && add+=(dmraid) || del+=(dmraid)
+	isTrue "${ISCSI}" && add+=(iscsi) || del+=(iscsi)
+	isTrue "${MDADM}" && add+=(mdraid) || del+=(mdraid)
+	isTrue "${LUKS}" && add+=(crypt) || del+=(crypt)
+	isTrue "${MULTIPATH}" && add+=(multipath) || del+=(multipath)
+	isTrue "${SPLASH}" && add+=(plymouth) || del+=(plymouth)
+
+	[[ ${add[*]} ]] && echo -n "-a '${add[*]}'"
+	[[ ${add[*]} && ${del[*]} ]] && echo -n ' '
+	[[ ${del[*]} ]] && echo -n "-o '${del[*]}'"
+}
+
+create_initramfs() {
+	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f' add_files=()
+
+	print_info 1 'initramfs: >> Initializing Dracut...'
+
+	if isTrue "${GENERIC}"
+	then
+		print_info 1 '           >> Will build generic (read: huge) initramfs'
+	else
+		opts+=\ -H
+	fi
+
+	if ! isTrue "${AUTO}"
+	then
+		opts+=" $(dracut_modules)"
+
+		if isTrue "${NORAMDISKMODULES}"
+		then
+			print_info 1 '           >> Not copying kernel modules and firmware...'
+			opts+=\ --no-kernel
+		else
+			isTrue "${FIRMWARE}" && opts+=" --fwdir ${FIRMWARE_DIR}"
+			[[ ${FIRMWARE_FILES} ]] && add_files+=(${FIRMWARE_FILES})
+		fi
+
+		isTrue "${DISKLABEL}" && print_info 1 '           >> Skipping explicit install of blkid.  Should be installed' \
+				&& print_info 1 '              automatically if needed.'
+		[[ ${INITRAMFS_OVERLAY} ]] && opts+=" ${INITRAMFS_OVERLAY} /"
+	else
+		print_info 1 '           >> Auto configuration - ignoring other options'
+	fi
+
+	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
+
+	print_info 1 "           >> dracut ${opts} \\"
+	print_info 1 "              ${tmprd} \\"
+	print_info 1 "              ${KV}"
+	eval dracut ${opts} \'${tmprd}\' \'${KV}\'
+
+	if isTrue "${INTEGRATED_INITRAMFS}"
+	then
+		mv ${tmprd} ${tmprd}.cpio.gz
+		sed -i '/^.*CONFIG_INITRAMFS_SOURCE=.*$/d' ${KERNEL_DIR}/.config
+		echo -e "CONFIG_INITRAMFS_SOURCE=\"${tmprd}.cpio.gz\"\nCONFIG_INITRAMFS_ROOT_UID=0\nCONFIG_INITRAMFS_ROOT_GID=0" \
+				>> ${KERNEL_DIR}/.config
+	fi
+
+	if ! isTrue "${CMD_NOINSTALL}"
+	then
+		if ! isTrue "${INTEGRATED_INITRAMFS}"
+		then
+			copy_image_with_preserve initramfs "${tmprd}" \
+				"initramfs-${KNAME}-${ARCH}-${KV}"
+		fi
+	fi
+}

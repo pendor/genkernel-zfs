@@ -68,6 +68,7 @@ longusage() {
   echo "	--no-mountboot		Don't mount BOOTDIR automatically"  
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
+  echo "	--local			Local mode; source modules from current directory"
   echo "	--gensplash=<theme>	Enable framebuffer splash using <theme>"
   echo "	--gensplash-res=<res>	Select splash theme resolutions to install"
   echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
@@ -94,10 +95,15 @@ longusage() {
   echo "				ramdisk"
   echo "	--luks			Include LUKS support"
   echo "				--> 'emerge cryptsetup-luks' with USE=-dynamic"
-  echo "	--no-busybox    Do not include busybox in the initramfs."
-  echo "	--unionfs       Include support for unionfs"
-  echo "	--netboot       Create a self-contained env in the initramfs"
-  echo "	--real-root=<foo> Specify a default for real_root="
+  echo "	--no-busybox		Do not include busybox in the initramfs."
+  echo "	--unionfs		Include support for unionfs"
+  echo "	--netboot		Create a self-contained env in the initramfs"
+  echo "	--real-root=<foo>	Specify a default for real_root="
+  echo "  Dracut"
+  echo "	--auto			Rely on Dracut system check instead of"
+  echo "				specifying modules by hand"
+  echo "	--generic		Build generic initramfs instead of"
+  echo "				default hostonly.  Notice that generic => huge"
   echo "  Internals"
   echo "	--arch-override=<arch>	Force to arch instead of autodetect"
   echo "	--cachedir=<dir>	Override the default cache location"
@@ -541,6 +547,23 @@ parse_cmdline() {
 		--config=*)
 			print_info 2 "CMD_GK_CONFIG: `parse_opt "$*"`"
 			;;
+		--local)
+		;;
+
+	   	# Dracut specific options
+		--no-dracut)
+			CMD_DRACUT=0
+			print_info 2 "CMD_DRACUT: ${CMD_DRACUT}"
+			;;
+		--auto)
+			CMD_AUTO=1
+			print_info 2 "CMD_AUTO: ${CMD_AUTO}"
+			;;
+		--generic)
+			CMD_GENERIC=1
+			print_info 2 "CMD_GENERIC: ${CMD_GENERIC}"
+			;;
+
 		all)
 			BUILD_KERNEL=1
 			BUILD_MODULES=1

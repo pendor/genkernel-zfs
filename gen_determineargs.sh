@@ -97,7 +97,7 @@ determine_real_args() {
 	set_config_with_override 1 MOUNTBOOT            CMD_MOUNTBOOT
 	set_config_with_override 1 BUILD_STATIC         CMD_STATIC
 	set_config_with_override 1 SAVE_CONFIG          CMD_SAVE_CONFIG
- 	set_config_with_override 1 SYMLINK              CMD_SYMLINK
+	set_config_with_override 1 SYMLINK              CMD_SYMLINK
 	set_config_with_override 2 INSTALL_MOD_PATH     CMD_INSTALL_MOD_PATH
 	set_config_with_override 1 OLDCONFIG            CMD_OLDCONFIG
 	set_config_with_override 1 LVM                  CMD_LVM
@@ -120,6 +120,9 @@ determine_real_args() {
 	set_config_with_override 1 KEYMAP               CMD_KEYMAP               "yes"
 	set_config_with_override 1 DOKEYMAPAUTO         CMD_DOKEYMAPAUTO
 	set_config_with_override 2 BUSYBOX_CONFIG       CMD_BUSYBOX_CONFIG
+	set_config_with_override 1 AUTO                 CMD_AUTO                 "no"
+	set_config_with_override 1 GENERIC              CMD_GENERIC              "no"
+	set_config_with_override 1 DRACUT               CMD_DRACUT               "yes"
 
 	BOOTDIR=`arch_replace "${BOOTDIR}"`
 	BOOTDIR=${BOOTDIR%/}    # Remove any trailing slash
@@ -133,7 +136,7 @@ determine_real_args() {
 	BLKID_BINCACHE=`cache_replace "${BLKID_BINCACHE}"`
 	FUSE_BINCACHE=`cache_replace "${FUSE_BINCACHE}"`
 	UNIONFS_FUSE_BINCACHE=`cache_replace "${UNIONFS_FUSE_BINCACHE}"`
-  
+
 	DEFAULT_KERNEL_CONFIG=`arch_replace "${DEFAULT_KERNEL_CONFIG}"`
 	BUSYBOX_CONFIG=`arch_replace "${BUSYBOX_CONFIG}"`
 	BUSYBOX_BINCACHE=`arch_replace "${BUSYBOX_BINCACHE}"`

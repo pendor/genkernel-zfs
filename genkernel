@@ -23,6 +23,10 @@ parse_opt() {
 	esac
 }
 
+case "$*" in
+	*--local*) GK_LOCAL_MODE=1 ; echo ok ;;
+esac
+
 # We don't know where our config is, so we check for it, and default to using
 # /etc/genkernel.conf if nobody has specified one.
 case "$*" in
@@ -32,7 +36,9 @@ case "$*" in
 esac
 
 # Pull in our configuration
+[ "${GK_LOCAL_MODE}" = 1 ] && CMD_GK_CONFIG=./genkernel.conf
 source ${CMD_GK_CONFIG:-/etc/genkernel.conf} || small_die "Could not read /etc/genkernel.conf"
+[ "${GK_LOCAL_MODE}" = 1 ] && GK_SHARE=.
 
 # Start sourcing other scripts
 source ${GK_SHARE}/gen_funcs.sh || small_die "Could not read ${GK_SHARE}/gen_funcs.sh"
@@ -41,7 +47,12 @@ source ${GK_SHARE}/gen_arch.sh || gen_die "Could not read ${GK_SHARE}/gen_arch.s
 source ${GK_SHARE}/gen_determineargs.sh || gen_die "Could not read ${GK_SHARE}/gen_determineargs.sh"
 source ${GK_SHARE}/gen_compile.sh || gen_die "Could not read ${GK_SHARE}/gen_compile.sh"
 source ${GK_SHARE}/gen_configkernel.sh || gen_die "Could not read ${GK_SHARE}/gen_configkernel.sh"
-source ${GK_SHARE}/gen_initramfs.sh || gen_die "Could not read ${GK_SHARE}/gen_initramfs.sh"
+if isTrue "${DRACUT}"
+then
+	source ${GK_SHARE}/gen_initramfs.sh || gen_die "Could not read ${GK_SHARE}/gen_initramfs.sh"
+else
+	source ${GK_SHARE}/gen_dracut.sh || gen_die "Could not read ${GK_SHARE}/gen_dracut.sh"
+fi
 source ${GK_SHARE}/gen_moddeps.sh || gen_die "Could not read ${GK_SHARE}/gen_moddeps.sh"
 source ${GK_SHARE}/gen_package.sh || gen_die "Could not read ${GK_SHARE}/gen_package.sh"
 source ${GK_SHARE}/gen_bootloader.sh || gen_die "Could not read ${GK_SHARE}/gen_bootloader.sh"
@@ -94,7 +105,8 @@ fi
 
 clear_log
 NORMAL=${GOOD} print_info 1 "Gentoo Linux Genkernel; Version ${GK_V}${NORMAL}"
-print_info 1 "Running with options: ${Options}"
+[ "${GK_LOCAL_MODE}" = 1 ] && localmsg=' in local mode'
+print_info 1 "Running${localmsg} with options: ${Options}"
 echo
 
 # Set ${ARCH}
@@ -122,9 +134,11 @@ set_kernel_arch
 
 [ ! -f "${TEMP}" ] && mkdir -p "${TEMP}"
 
-setup_cache_dir
-
-check_distfiles
+if ! isTrue "${DRACUT}"
+then
+	setup_cache_dir
+	check_distfiles
+fi
 
 dump_debugcache
 
@@ -279,17 +293,20 @@ fi
 
 if [ "${BUILD_RAMDISK}" -eq '1' ]
 then
-	[ "${DISKLABEL}" -eq '1' ] && compile_e2fsprogs
-
-	if [ "${BUSYBOX}" -eq '1' ]
+	if ! isTrue "${DRACUT}"
 	then
-		# Compile Busybox
-		compile_busybox
-	fi
+		[ "${DISKLABEL}" -eq '1' ] && compile_e2fsprogs
 
-	if isTrue "${UNIONFS}"
-	then
-		compile_unionfs_fuse
+		if [ "${BUSYBOX}" -eq '1' ]
+		then
+			# Compile Busybox
+			compile_busybox
+		fi
+
+		if isTrue "${UNIONFS}"
+		then
+			compile_unionfs_fuse
+		fi
 	fi
 
 	# Compile initramfs
