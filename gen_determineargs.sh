@@ -120,9 +120,13 @@ determine_real_args() {
 	set_config_with_override 1 KEYMAP               CMD_KEYMAP               "yes"
 	set_config_with_override 1 DOKEYMAPAUTO         CMD_DOKEYMAPAUTO
 	set_config_with_override 2 BUSYBOX_CONFIG       CMD_BUSYBOX_CONFIG
-	set_config_with_override 1 AUTO                 CMD_AUTO                 "no"
-	set_config_with_override 1 GENERIC              CMD_GENERIC              "no"
+	set_config_with_override 1 AUTO                 CMD_AUTO
+	set_config_with_override 1 GENERIC              CMD_GENERIC
 	set_config_with_override 1 DRACUT               CMD_DRACUT               "yes"
+	set_config_with_override 1 MDRAID               CMD_MDRAID
+	set_config_with_override 1 PLYMOUTH             CMD_PLYMOUTH
+	set_config_with_override 2 EXTRA_MODULES        CMD_EXTRA_MODULES
+	set_config_with_override 2 EXTRA_OPTIONS        CMD_EXTRA_OPTIONS
 
 	BOOTDIR=`arch_replace "${BOOTDIR}"`
 	BOOTDIR=${BOOTDIR%/}    # Remove any trailing slash

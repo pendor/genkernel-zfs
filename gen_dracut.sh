@@ -2,22 +2,22 @@
 # $Id$
 
 dracut_modules() {
-	local add=() del=()
+	local m=()
 
+	isTrue "${PLYMOUTH}" && isTrue "${GEN2SPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 
-	isTrue "${LVM}" && add+=(lvm) || del+=(lvm)
-	isTrue "${DMRAID}" && add+=(dmraid) || del+=(dmraid)
-	isTrue "${ISCSI}" && add+=(iscsi) || del+=(iscsi)
-	isTrue "${MDADM}" && add+=(mdraid) || del+=(mdraid)
-	isTrue "${LUKS}" && add+=(crypt) || del+=(crypt)
-	isTrue "${MULTIPATH}" && add+=(multipath) || del+=(multipath)
-	isTrue "${SPLASH}" && add+=(plymouth) || del+=(plymouth)
+	isTrue "${LVM}" && m+=(lvm)
+	isTrue "${DMRAID}" && m+=(dmraid)
+	isTrue "${ISCSI}" && m+=(iscsi)
+	isTrue "${MDRAID}" && m+=(mdraid)
+	isTrue "${LUKS}" && m+=(crypt)
+	isTrue "${MULTIPATH}" && m+=(multipath)
+	isTrue "${PLYMOUTH}" && m+=(plymouth)
+	isTrue "${GEN2SPLASH}" && m+=(gen2splash)
 
-	[[ ${add[*]} ]] && echo -n "-a '${add[*]}'"
-	[[ ${add[*]} && ${del[*]} ]] && echo -n ' '
-	[[ ${del[*]} ]] && echo -n "-o '${del[*]}'"
+	[[ ${m[*]} ]] && echo -n "-m '${m[*]} ${EXTRA_MODULES}'"
 }
 
 create_initramfs() {
@@ -53,6 +53,7 @@ create_initramfs() {
 	fi
 
 	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
+	opts+="${EXTRA_OPTIONS}"
 
 	print_info 1 "           >> dracut ${opts} \\"
 	print_info 1 "              ${tmprd} \\"

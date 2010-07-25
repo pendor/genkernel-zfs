@@ -14,6 +14,7 @@ longusage() {
   echo
   echo "Available Options: "
   echo "  Configuration settings"
+  echo "	--local			Local mode; source modules from current directory"
   echo "	--config=<file>	genkernel configuration file to use"
   echo "  Debug settings"
   echo "	--loglevel=<0-5>	Debug Verbosity Level"
@@ -41,7 +42,6 @@ longusage() {
   echo "	--symlink		Manage symlinks in /boot for installed images"
   echo "	--no-symlink		Do not manage symlinks"
   echo "	--no-ramdisk-modules	Don't copy any modules to the ramdisk"
-  echo "	--all-ramdisk-modules	Copy all kernel modules to the ramdisk"
   echo "	--callback=<...>	Run the specified arguments after the"
   echo "				kernel and modules have been compiled"
   echo "	--static		Build a static (monolithic kernel)."
@@ -68,11 +68,24 @@ longusage() {
   echo "	--no-mountboot		Don't mount BOOTDIR automatically"  
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
-  echo "	--local			Local mode; source modules from current directory"
   echo "	--gensplash=<theme>	Enable framebuffer splash using <theme>"
+  echo "				(deprecated; use --splash=<theme>)"
   echo "	--gensplash-res=<res>	Select splash theme resolutions to install"
+  echo "				(deprecated; use --splash-res=<res>)"
   echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
   echo "	--splash-res=<res>	Select splash theme resolutions to install"
+  echo "	--lvm			Include LVM support"
+  echo "	--lvm2			Include LVM support (deprecated; use --lvm)"
+  echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
+  echo "				(obsolete with Dracut; use --mdraid)"
+  echo "	--dmraid		Include DMRAID support"
+  echo "	--multipath		Include Multipath support"
+  echo "	--iscsi			Include iSCSI support"
+  echo "	--bootloader=grub	Add new kernel to GRUB configuration"
+  echo "	--luks			Include LUKS support"
+  echo "				--> 'emerge cryptsetup-luks' with USE=-dynamic"
+  echo "  Internal engine"
+  echo "	--all-ramdisk-modules	Copy all kernel modules to the ramdisk"
   echo "	--do-keymap-auto	Forces keymap selection at boot"
   echo "	--no-keymap		Disables keymap selection support"
   echo "	--evms			Include EVMS support"
@@ -81,29 +94,34 @@ longusage() {
   echo "	--evms2			Include EVMS support"
   echo "				--> 'emerge evms' in the host operating system"
   echo "				first"
-  echo "	--lvm			Include LVM support"
-  echo "	--lvm2			Include LVM support"
-  echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
-  echo "	--dmraid		Include DMRAID support"
-  echo "	--multipath		Include Multipath support"
-  echo "	--iscsi			Include iSCSI support"
   echo "	--slowusb		Enables extra pauses for slow USB CD boots"
-  echo "	--bootloader=grub	Add new kernel to GRUB configuration"
+  echo "	--no-busybox		Do not include busybox in the initramfs."
+  echo "	--unionfs		Include EXPERIMENTAL support for unionfs"
+  echo "	--netboot		Create a self-contained env in the initramfs"
+  echo "	--real-root=<foo>	Specify a default for real_root="
   echo "	--linuxrc=<file>	Specifies a user created linuxrc"
   echo "	--busybox-config=<file>	Specifies a user created busybox config"
   echo "	--disklabel		Include disk label and uuid support in your"
   echo "				ramdisk"
-  echo "	--luks			Include LUKS support"
-  echo "				--> 'emerge cryptsetup-luks' with USE=-dynamic"
-  echo "	--no-busybox		Do not include busybox in the initramfs."
-  echo "	--unionfs		Include support for unionfs"
-  echo "	--netboot		Create a self-contained env in the initramfs"
-  echo "	--real-root=<foo>	Specify a default for real_root="
-  echo "  Dracut"
+  echo "  Dracut engine"
+  echo "	--no-dracut		Build system using old internal engine"
+  echo "				(will be removed in the future)"
   echo "	--auto			Rely on Dracut system check instead of"
   echo "				specifying modules by hand"
   echo "	--generic		Build generic initramfs instead of"
   echo "				default hostonly.  Notice that generic => huge"
+  echo "	--mdraid		Include RAID support via mdadm"
+  echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
+  echo "				configuration in /etc/plymouth/plymouthd.conf"
+  echo "				requires >=plymouth-0.8.3 to be installed"
+  echo "	--extra-modules=<modules list>"
+  echo "				Additional Dracut modules;"
+  echo "				see /usr/share/dracut/modules.d for possible"
+  echo "				values; separate modules by space, e.g.:"
+  echo "				--extra-modules=\"lvm crypt nfs\""
+  echo "	--extra-options=<options>"
+  echo "				Pass extra options to dracut;"
+  echo "				see 'man 8 dracut'"
   echo "  Internals"
   echo "	--arch-override=<arch>	Force to arch instead of autodetect"
   echo "	--cachedir=<dir>	Override the default cache location"
@@ -221,25 +239,6 @@ parse_cmdline() {
 			CMD_BOOTDIR=`parse_opt "$*"`
 			print_info 2 "CMD_BOOTDIR: ${CMD_BOOTDIR}"
 			;;
-		--do-keymap-auto)
-			CMD_DOKEYMAPAUTO=1
-			CMD_KEYMAP=1
-			print_info 2 "CMD_DOKEYMAPAUTO: ${CMD_DOKEYMAPAUTO}"
-			;;
-		--no-keymap)
-			CMD_KEYMAP=0
-			print_info 2 "CMD_KEYMAP: ${CMD_KEYMAP}"
-			;;
-		--evms)
-			CMD_EVMS=1
-			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
-			;;
-		--evms2)
-			CMD_EVMS=1
-			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
-			echo
-			print_warning 1 "Please use --evms, as --evms2 is deprecated."
-			;;
 		--lvm)
 			CMD_LVM=1
 			print_info 2 "CMD_LVM: ${CMD_LVM}"
@@ -251,28 +250,15 @@ parse_cmdline() {
 			print_warning 1 "Please use --lvm, as --lvm2 is deprecated."
 			;;
 		--mdadm)
-			CMD_MDADM=1
-			print_info 2 "CMD_MDADM: $CMD_MDADM"
-			;;
-		--no-busybox)
-			CMD_BUSYBOX=0
-			print_info 2 "CMD_BUSYBOX: ${CMD_BUSYBOX}"
-			;;
-		--unionfs)
-			CMD_UNIONFS=1
-			print_info 2 "CMD_UNIONFS: ${CMD_UNIONFS}"
-			;;
-		--netboot)
-			CMD_NETBOOT=1
-			print_info 2 "CMD_NETBOOT: ${CMD_NETBOOT}"
-			;;
-		--real-root=*)
-			CMD_REAL_ROOT=`parse_opt "$*"`
-			print_info 2 "CMD_REAL_ROOT: ${CMD_REAL_ROOT}"
-			;;
-		--slowusb)
-			CMD_SLOWUSB=1
-			print_info 2 "CMD_SLOWUSB: ${CMD_SLOWUSB}"
+			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
+				CMD_MDRAID=1
+				print_info 2 "CMD_MDRAID: $CMD_MDRAID"
+				echo
+				print_warning 1 "Please use --mdraid, as --mdadm is obsolete."
+			else
+				CMD_MDADM=1
+				print_info 2 "CMD_MDADM: $CMD_MDADM"
+			fi
 			;;
 		--dmraid)
 			if [ ! -e /usr/include/libdevmapper.h ]
@@ -413,10 +399,6 @@ parse_cmdline() {
 			CMD_NORAMDISKMODULES=1
 			print_info 2 "CMD_NORAMDISKMODULES: ${CMD_NORAMDISKMODULES}"
 			;;
-		--all-ramdisk-modules)
-			CMD_ALLRAMDISKMODULES=1
-			print_info 2 "CMD_ALLRAMDISKMODULES: ${CMD_ALLRAMDISKMODULES}"
-			;;
 		--callback=*)
 			CMD_CALLBACK=`parse_opt "$*"`
 			print_info 2 "CMD_CALLBACK: ${CMD_CALLBACK}/$*"
@@ -503,24 +485,12 @@ parse_cmdline() {
 			CMD_INITRAMFS_OVERLAY=`parse_opt "$*"`
 			print_info 2 "CMD_INITRAMFS_OVERLAY: ${CMD_INITRAMFS_OVERLAY}"
 			;;
-		--linuxrc=*)
-			CMD_LINUXRC=`parse_opt "$*"`
-			print_info 2 "CMD_LINUXRC: ${CMD_LINUXRC}"
-			;;
-		--busybox-config=*)
-			CMD_BUSYBOX_CONFIG=`parse_opt "$*"`
-			print_info 2 "CMD_BUSYBOX_CONFIG: ${CMD_BUSYBOX_CONFIG}"
-			;;
 		--genzimage)
 			KERNEL_MAKE_DIRECTIVE_2='zImage.initrd'
 			KERNEL_BINARY_2='arch/powerpc/boot/zImage.initrd'
 			CMD_GENZIMAGE="yes"
 #			ENABLE_PEGASOS_HACKS="yes"
 #			print_info 2 "ENABLE_PEGASOS_HACKS: ${ENABLE_PEGASOS_HACKS}"
-			;;
-		--disklabel)
-			CMD_DISKLABEL=1
-			print_info 2 "CMD_DISKLABEL: ${CMD_DISKLABEL}"
 			;;
 		--luks)
 			CMD_LUKS=1
@@ -550,7 +520,64 @@ parse_cmdline() {
 		--local)
 		;;
 
-	   	# Dracut specific options
+		# Internal engine
+		--no-busybox)
+			CMD_BUSYBOX=0
+			print_info 2 "CMD_BUSYBOX: ${CMD_BUSYBOX}"
+			;;
+		--unionfs)
+			CMD_UNIONFS=1
+			print_info 2 "CMD_UNIONFS: ${CMD_UNIONFS}"
+			;;
+		--netboot)
+			CMD_NETBOOT=1
+			print_info 2 "CMD_NETBOOT: ${CMD_NETBOOT}"
+			;;
+		--real-root=*)
+			CMD_REAL_ROOT=`parse_opt "$*"`
+			print_info 2 "CMD_REAL_ROOT: ${CMD_REAL_ROOT}"
+			;;
+		--slowusb)
+			CMD_SLOWUSB=1
+			print_info 2 "CMD_SLOWUSB: ${CMD_SLOWUSB}"
+			;;
+		--do-keymap-auto)
+			CMD_DOKEYMAPAUTO=1
+			CMD_KEYMAP=1
+			print_info 2 "CMD_DOKEYMAPAUTO: ${CMD_DOKEYMAPAUTO}"
+			;;
+		--no-keymap)
+			CMD_KEYMAP=0
+			print_info 2 "CMD_KEYMAP: ${CMD_KEYMAP}"
+			;;
+		--evms)
+			CMD_EVMS=1
+			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
+			;;
+		--evms2)
+			CMD_EVMS=1
+			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
+			echo
+			print_warning 1 "Please use --evms, as --evms2 is deprecated."
+			;;
+		--disklabel)
+			CMD_DISKLABEL=1
+			print_info 2 "CMD_DISKLABEL: ${CMD_DISKLABEL}"
+			;;
+		--all-ramdisk-modules)
+			CMD_ALLRAMDISKMODULES=1
+			print_info 2 "CMD_ALLRAMDISKMODULES: ${CMD_ALLRAMDISKMODULES}"
+			;;
+		--linuxrc=*)
+			CMD_LINUXRC=`parse_opt "$*"`
+			print_info 2 "CMD_LINUXRC: ${CMD_LINUXRC}"
+			;;
+		--busybox-config=*)
+			CMD_BUSYBOX_CONFIG=`parse_opt "$*"`
+			print_info 2 "CMD_BUSYBOX_CONFIG: ${CMD_BUSYBOX_CONFIG}"
+			;;
+
+	   	# Dracut engine
 		--no-dracut)
 			CMD_DRACUT=0
 			print_info 2 "CMD_DRACUT: ${CMD_DRACUT}"
@@ -562,6 +589,22 @@ parse_cmdline() {
 		--generic)
 			CMD_GENERIC=1
 			print_info 2 "CMD_GENERIC: ${CMD_GENERIC}"
+			;;
+		--mdraid)
+			CMD_MDRAID=1
+			print_info 2 "CMD_MDRAID: ${CMD_MDRAID}"
+			;;
+		--plymouth)
+			CMD_PLYMOUTH=1
+			print_info 2 "CMD_PLYMOUTH: ${CMD_PLYMOUTH}"
+			;;
+		--extra-modules=*)
+			CMD_EXTRA_MODULES=`parse_opt "$*"`
+			print_info 2 "CMD_EXTRA_MODULES: ${CMD_EXTRA_MODULES}"
+			;;
+		--extra-options=*)
+			CMD_EXTRA_OPTIONS=`parse_opt "$*"`
+			print_info 2 "CMD_EXTRA_OPTIONS: ${CMD_EXTRA_OPTIONS}"
 			;;
 
 		all)
