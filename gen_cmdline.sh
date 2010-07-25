@@ -493,8 +493,15 @@ parse_cmdline() {
 #			print_info 2 "ENABLE_PEGASOS_HACKS: ${ENABLE_PEGASOS_HACKS}"
 			;;
 		--luks)
-			CMD_LUKS=1
-			print_info 2 "CMD_LUKS: ${CMD_LUKS}"
+			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
+				CMD_CRYPT=1
+				print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
+				echo
+				print_warning 1 "Please use --crypt, as --luks is obsolete."
+			else
+				CMD_LUKS=1
+				print_info 2 "CMD_LUKS: ${CMD_LUKS}"
+			fi
 			;;
 		--firmware)
 			CMD_FIRMWARE=1
@@ -593,6 +600,10 @@ parse_cmdline() {
 		--mdraid)
 			CMD_MDRAID=1
 			print_info 2 "CMD_MDRAID: ${CMD_MDRAID}"
+			;;
+		--crypt)
+			CMD_CRYPT=1
+			print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
 			;;
 		--plymouth)
 			CMD_PLYMOUTH=1

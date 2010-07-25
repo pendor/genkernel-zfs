@@ -1,6 +1,8 @@
 #!/bin/bash
 # $Id$
 
+MODULES=LVM\ DMRAID\ ISCSI\ MDRAID\ CRYPT\ MULTIPATH\ PLYMOUTH\ GEN2SPLASH
+
 dracut_modules() {
 	local m=()
 
@@ -8,14 +10,10 @@ dracut_modules() {
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 
-	isTrue "${LVM}" && m+=(lvm)
-	isTrue "${DMRAID}" && m+=(dmraid)
-	isTrue "${ISCSI}" && m+=(iscsi)
-	isTrue "${MDRAID}" && m+=(mdraid)
-	isTrue "${LUKS}" && m+=(crypt)
-	isTrue "${MULTIPATH}" && m+=(multipath)
-	isTrue "${PLYMOUTH}" && m+=(plymouth)
-	isTrue "${GEN2SPLASH}" && m+=(gen2splash)
+	for var in ${MODULES}; do
+		var="${var^^}"
+		isTrue "${!var}" && m+=(${var,,})
+	done
 
 	[[ ${m[*]} ]] && echo -n "-m '${m[*]} ${EXTRA_MODULES}'"
 }
