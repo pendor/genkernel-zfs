@@ -24,7 +24,7 @@ parse_opt() {
 }
 
 case "$*" in
-	*--local*) GK_LOCAL_MODE=1 ; echo ok ;;
+	*--local*) GK_LOCAL_MODE=1 ;;
 esac
 
 # We don't know where our config is, so we check for it, and default to using
