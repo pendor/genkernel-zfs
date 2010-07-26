@@ -1,21 +1,35 @@
 #!/bin/bash
 # $Id$
 
-MODULES=LVM\ DMRAID\ ISCSI\ MDRAID\ CRYPT\ MULTIPATH\ PLYMOUTH\ GEN2SPLASH
+BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
+BASIC_MODULES+=\ udev-rules\ uswsusp\ base
+MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gen2splash
 
 dracut_modules() {
-	local m=()
+	local a=()
 
 	isTrue "${PLYMOUTH}" && isTrue "${GEN2SPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 
-	for var in ${MODULES}; do
+	for var in ${MODULES}
+	do
 		var="${var^^}"
-		isTrue "${!var}" && m+=(${var,,})
+		isTrue "${!var}" && a+=(${var,,})
 	done
 
-	[[ ${m[*]} ]] && echo -n "-m '${m[*]} ${EXTRA_MODULES}'"
+	a+=(${EXTRA_MODULES})
+
+	if ! isTrue "${AUTO}"
+	then
+		local basic
+		isTrue "${NORAMDISKMODULES}" &&
+				basic="${BASIC_MODULES/ kernel-modules / }" \
+				|| basic="${BASIC_MODULES}"
+		echo -n "-m '${basic}'"
+	fi
+
+	[[ ${a[*]} ]] && echo -n " -a '${a[*]}'"
 }
 
 create_initramfs() {
@@ -30,36 +44,25 @@ create_initramfs() {
 		opts+=\ -H
 	fi
 
-	if ! isTrue "${AUTO}"
+	if isTrue "${NORAMDISKMODULES}"
 	then
-		opts+=" $(dracut_modules)"
-
-		if isTrue "${NORAMDISKMODULES}"
-		then
-			print_info 1 '           >> Not copying kernel modules and firmware...'
-			opts+=\ --no-kernel
-		else
-			isTrue "${FIRMWARE}" && opts+=" --fwdir ${FIRMWARE_DIR}"
-			[[ ${FIRMWARE_FILES} ]] && add_files+=(${FIRMWARE_FILES})
-		fi
-
-		isTrue "${DISKLABEL}" && print_info 1 '           >> Skipping explicit install of blkid.  Should be installed' \
-				&& print_info 1 '              automatically if needed.'
-		[[ ${INITRAMFS_OVERLAY} ]] && opts+=" ${INITRAMFS_OVERLAY} /"
+		print_info 1 '           >> Not copying kernel modules and firmware...'
+		opts+=\ --no-kernel
 	else
-		print_info 1 '           >> Auto configuration - ignoring other options'
+		isTrue "${FIRMWARE}" && opts+=" --fwdir ${FIRMWARE_DIR}"
+		[[ ${FIRMWARE_FILES} ]] && add_files+=(${FIRMWARE_FILES})
 	fi
 
-	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
 	[[ ${DRACUT_DIR} ]] && opts="-l ${opts}"
+	[[ ${INITRAMFS_OVERLAY} ]] && opts+=" ${INITRAMFS_OVERLAY} /"
+	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
 	opts+=" ${EXTRA_OPTIONS}"
+	opts+=" $(dracut_modules)"
 
-	print_info 1 "           >> dracut ${opts} \\"
-	print_info 1 "              '${tmprd}' \\"
-	print_info 1 "              '${KV}'"
+	print_info 1 "           >> dracut ${opts} '${tmprd}' '${KV}'"
 	if [[ ${DRACUT_DIR} ]]; then
 		cd "${DRACUT_DIR}"
-		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\'
+		eval ./dracut ${opts} -v \'${tmprd}\' \'${KV}\'
 		cd - >/dev/null
 	else
 		eval dracut ${opts} \'${tmprd}\' \'${KV}\'
