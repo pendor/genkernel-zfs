@@ -51,12 +51,19 @@ create_initramfs() {
 	fi
 
 	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
-	opts+="${EXTRA_OPTIONS}"
+	[[ ${DRACUT_DIR} ]] && opts="-l ${opts}"
+	opts+=" ${EXTRA_OPTIONS}"
 
 	print_info 1 "           >> dracut ${opts} \\"
-	print_info 1 "              ${tmprd} \\"
-	print_info 1 "              ${KV}"
-	eval dracut ${opts} \'${tmprd}\' \'${KV}\'
+	print_info 1 "              '${tmprd}' \\"
+	print_info 1 "              '${KV}'"
+	if [[ ${DRACUT_DIR} ]]; then
+		cd "${DRACUT_DIR}"
+		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\'
+		cd - >/dev/null
+	else
+		eval dracut ${opts} \'${tmprd}\' \'${KV}\'
+	fi
 
 	if isTrue "${INTEGRATED_INITRAMFS}"
 	then

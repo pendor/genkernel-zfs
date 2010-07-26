@@ -65,33 +65,27 @@ longusage() {
   echo "				autodetect."
   echo "	--makeopts=<makeopts>	Make options such as -j2, etc..."
   echo "	--mountboot		Mount BOOTDIR automatically if mountable"
-  echo "	--no-mountboot		Don't mount BOOTDIR automatically"  
+  echo "	--no-mountboot		Don't mount BOOTDIR automatically"
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
-  echo "	--gensplash=<theme>	Enable framebuffer splash using <theme>"
-  echo "				(deprecated; use --splash=<theme>)"
-  echo "	--gensplash-res=<res>	Select splash theme resolutions to install"
-  echo "				(deprecated; use --splash-res=<res>)"
-  echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
-  echo "	--splash-res=<res>	Select splash theme resolutions to install"
-  echo "	--lvm			Include LVM support"
-  echo "	--lvm2			Include LVM support (deprecated; use --lvm)"
-  echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
-  echo "				(obsolete with Dracut; use --mdraid)"
-  echo "	--dmraid		Include DMRAID support"
-  echo "	--multipath		Include Multipath support"
-  echo "	--iscsi			Include iSCSI support"
   echo "	--bootloader=grub	Add new kernel to GRUB configuration"
+  echo "	--dmraid		Include DMRAID support"
+  echo "	--iscsi			Include iSCSI support"
   echo "	--luks			Include LUKS support"
   echo "				--> 'emerge cryptsetup-luks' with USE=-dynamic"
+  echo "	--lvm			Include LVM support"
+  echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
+  echo "				(obsolete with Dracut; use --mdraid)"
+  echo "	--multipath		Include Multipath support"
+  echo "	--splash		Enable framebuffer splash (splashutils);"
+  echo "				set up in /etc/conf.d/splash"
   echo "  Internal engine"
   echo "	--all-ramdisk-modules	Copy all kernel modules to the ramdisk"
   echo "	--do-keymap-auto	Forces keymap selection at boot"
   echo "	--no-keymap		Disables keymap selection support"
+  echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
+  echo "	--splash-res=<res>	Select splash theme resolutions to install"
   echo "	--evms			Include EVMS support"
-  echo "				--> 'emerge evms' in the host operating system"
-  echo "				first"
-  echo "	--evms2			Include EVMS support"
   echo "				--> 'emerge evms' in the host operating system"
   echo "				first"
   echo "	--slowusb		Enables extra pauses for slow USB CD boots"
@@ -106,6 +100,11 @@ longusage() {
   echo "  Dracut engine"
   echo "	--no-dracut		Build system using old internal engine"
   echo "				(will be removed in the future)"
+  echo "	--dracut-dir=<dir>	Directory of Dracut sources; if given Dracut"
+  echo "				is run in local mode (see description of '-l'"
+  echo "				in 'man 8 dracut'); script changes current"
+  echo "				directory to <dir>, so don't use relative"
+  echo "				paths then"
   echo "	--auto			Rely on Dracut system check instead of"
   echo "				specifying modules by hand"
   echo "	--generic		Build generic initramfs instead of"
@@ -114,6 +113,8 @@ longusage() {
   echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
   echo "				configuration in /etc/plymouth/plymouthd.conf"
   echo "				requires >=plymouth-0.8.3 to be installed"
+  echo "	--gen2splash		Use old good Gentoo Splash (splashutils);"
+  echo "				set up in /etc/conf.d/splash"
   echo "	--extra-modules=<modules list>"
   echo "				Additional Dracut modules;"
   echo "				see /usr/share/dracut/modules.d for possible"
@@ -369,9 +370,17 @@ parse_cmdline() {
 			print_info 2 "SPLASH_THEME: ${SPLASH_THEME}"
 			;;
 		--splash)
-			CMD_SPLASH=1
-			SPLASH_THEME='default'
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
+			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
+				CMD_GEN2SPLASH=1
+				print_info 2 "CMD_GEN2SPLASH: ${CMD_GEN2SPLASH}"
+				echo
+				print_warning 1 "Please use --gen2splash, as --splash is obsolete."
+				print_warning 1 "Set up splash in /etc/conf.d/splash"
+			else
+				CMD_SPLASH=1
+				SPLASH_THEME='default'
+				print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
+			fi
 			;;
 		--no-splash)
 			CMD_SPLASH=0
@@ -412,11 +421,11 @@ parse_cmdline() {
 			TEMP=${TMPDIR}/$RANDOM.$RANDOM.$RANDOM.$$
 			print_info 2 "TMPDIR: ${TMPDIR}"
 			print_info 2 "TEMP: ${TEMP}"
-			;; 
+			;;
 		--postclear)
 			CMD_POSTCLEAR=1
 			print_info 2 "CMD_POSTCLEAR: ${CMD_POSTCLEAR}"
-			;; 
+			;;
 		--arch-override=*)
 			CMD_ARCHOVERRIDE=`parse_opt "$*"`
 			print_info 2 "CMD_ARCHOVERRIDE: ${CMD_ARCHOVERRIDE}"
@@ -589,6 +598,10 @@ parse_cmdline() {
 			CMD_DRACUT=0
 			print_info 2 "CMD_DRACUT: ${CMD_DRACUT}"
 			;;
+		--dracut-dir=*)
+			CMD_DRACUT_DIR=`parse_opt "$*"`
+			print_info 2 "CMD_DRACUT_DIR: ${CMD_DRACUT_DIR}"
+			;;
 		--auto)
 			CMD_AUTO=1
 			print_info 2 "CMD_AUTO: ${CMD_AUTO}"
@@ -608,6 +621,10 @@ parse_cmdline() {
 		--plymouth)
 			CMD_PLYMOUTH=1
 			print_info 2 "CMD_PLYMOUTH: ${CMD_PLYMOUTH}"
+			;;
+		--gen2splash)
+			CMD_GEN2SPLASH=1
+			print_info 2 "CMD_GEN2SPLASH: ${CMD_GEN2SPLASH}"
 			;;
 		--extra-modules=*)
 			CMD_EXTRA_MODULES=`parse_opt "$*"`

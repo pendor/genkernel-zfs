@@ -123,9 +123,11 @@ determine_real_args() {
 	set_config_with_override 1 AUTO                 CMD_AUTO
 	set_config_with_override 1 GENERIC              CMD_GENERIC
 	set_config_with_override 1 DRACUT               CMD_DRACUT               "yes"
+	set_config_with_override 2 DRACUT_DIR           CMD_DRACUT_DIR
 	set_config_with_override 1 MDRAID               CMD_MDRAID
 	set_config_with_override 1 CRYPT                CMD_CRYPT
 	set_config_with_override 1 PLYMOUTH             CMD_PLYMOUTH
+	set_config_with_override 1 GEN2SPLASH           CMD_GEN2SPLASH
 	set_config_with_override 2 EXTRA_MODULES        CMD_EXTRA_MODULES
 	set_config_with_override 2 EXTRA_OPTIONS        CMD_EXTRA_OPTIONS
 
