@@ -6,7 +6,7 @@ BASIC_MODULES+=\ udev-rules\ uswsusp\ base
 MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gen2splash
 
 dracut_modules() {
-	local a=()
+	local a=() o=()
 
 	isTrue "${PLYMOUTH}" && isTrue "${GEN2SPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
@@ -18,22 +18,15 @@ dracut_modules() {
 		isTrue "${!var}" && a+=(${var,,})
 	done
 
-	a+=(${EXTRA_MODULES})
+	a+=(${ADD_MODULES})
 
-	if ! isTrue "${AUTO}"
-	then
-		local basic
-		isTrue "${NORAMDISKMODULES}" &&
-				basic="${BASIC_MODULES/ kernel-modules / }" \
-				|| basic="${BASIC_MODULES}"
-		echo -n "-m '${basic}'"
-	fi
-
+	! isTrue "${AUTO}" && echo -n "-m '${basic}'"
 	[[ ${a[*]} ]] && echo -n " -a '${a[*]}'"
+	[[ ${o[*]} ]] && echo -n " -o '${o[*]}'"
 }
 
 create_initramfs() {
-	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f' add_files=()
+	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f -v' add_files=()
 
 	print_info 1 'initramfs: >> Initializing Dracut...'
 
@@ -47,7 +40,7 @@ create_initramfs() {
 	if isTrue "${NORAMDISKMODULES}"
 	then
 		print_info 1 '           >> Not copying kernel modules and firmware...'
-		opts+=\ --no-kernel
+		opts+=\ --ignore-kernel-modules
 	else
 		isTrue "${FIRMWARE}" && opts+=" --fwdir ${FIRMWARE_DIR}"
 		[[ ${FIRMWARE_FILES} ]] && add_files+=(${FIRMWARE_FILES})
@@ -62,10 +55,10 @@ create_initramfs() {
 	print_info 1 "           >> dracut ${opts} '${tmprd}' '${KV}'"
 	if [[ ${DRACUT_DIR} ]]; then
 		cd "${DRACUT_DIR}"
-		eval ./dracut ${opts} -v \'${tmprd}\' \'${KV}\'
+		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\' 2>&1 | grep '\*\*\*'
 		cd - >/dev/null
 	else
-		eval dracut ${opts} \'${tmprd}\' \'${KV}\'
+		eval dracut ${opts} \'${tmprd}\' \'${KV}\' 2>&1 | grep '\*\*\*'
 	fi
 
 	if isTrue "${INTEGRATED_INITRAMFS}"
