@@ -8,7 +8,7 @@ MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gensplash
 dracut_modules() {
 	local a=() o=()
 
-	isTrue "${PLYMOUTH}" && isTrue "${GEN2SPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
+	isTrue "${PLYMOUTH}" && isTrue "${GENSPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 
@@ -20,7 +20,7 @@ dracut_modules() {
 
 	a+=(${ADD_MODULES})
 
-	! isTrue "${AUTO}" && echo -n "-m '${basic}'"
+	! isTrue "${AUTO}" && echo -n "-m '${BASIC_MODULES}'"
 	[[ ${a[*]} ]] && echo -n " -a '${a[*]}'"
 	[[ ${o[*]} ]] && echo -n " -o '${o[*]}'"
 }
@@ -52,13 +52,17 @@ create_initramfs() {
 	opts+=" ${EXTRA_OPTIONS}"
 	opts+=" $(dracut_modules)"
 
+	export DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}
+	export DRACUT_GENSPLASH_RES=${GENSPLASH_RES}
+	print_info 1 "           >> DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}"
+	print_info 1 "           >> DRACUT_GENSPLASH_RES=${GENSPLASH_RES}"
 	print_info 1 "           >> dracut ${opts} '${tmprd}' '${KV}'"
 	if [[ ${DRACUT_DIR} ]]; then
 		cd "${DRACUT_DIR}"
-		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\' 2>&1 | grep '\*\*\*'
+		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\'
 		cd - >/dev/null
 	else
-		eval dracut ${opts} \'${tmprd}\' \'${KV}\' 2>&1 | grep '\*\*\*'
+		eval dracut ${opts} \'${tmprd}\' \'${KV}\'
 	fi
 
 	if isTrue "${INTEGRATED_INITRAMFS}"
