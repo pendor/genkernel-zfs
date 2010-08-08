@@ -127,8 +127,8 @@ determine_real_args() {
 	set_config_with_override 1 MDRAID               CMD_MDRAID
 	set_config_with_override 1 CRYPT                CMD_CRYPT
 	set_config_with_override 1 PLYMOUTH             CMD_PLYMOUTH
-	set_config_with_override 1 GEN2SPLASH           CMD_GEN2SPLASH
-	set_config_with_override 2 EXTRA_MODULES        CMD_EXTRA_MODULES
+	set_config_with_override 1 GENSPLASH            CMD_GENSPLASH
+	set_config_with_override 2 ADD_MODULES          CMD_ADD_MODULES
 	set_config_with_override 2 EXTRA_OPTIONS        CMD_EXTRA_OPTIONS
 
 	BOOTDIR=`arch_replace "${BOOTDIR}"`

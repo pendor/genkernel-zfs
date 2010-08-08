@@ -34,9 +34,6 @@ longusage() {
   echo "	--no-clean		Do not run make clean before compilation"
   echo "	--no-mrproper		Do not run make mrproper before compilation"
   echo "	--oldconfig		Implies --no-clean and runs a 'make oldconfig'"
-  echo "	--gensplash		Install framebuffer splash support into initramfs"
-  echo "	--splash		Install framebuffer splash support into initramfs"
-  echo "	--no-splash		Do not install framebuffer splash"
   echo "	--install		Install the kernel after building"
   echo "	--no-install		Do not install the kernel after building"
   echo "	--symlink		Manage symlinks in /boot for installed images"
@@ -77,14 +74,14 @@ longusage() {
   echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
   echo "				(obsolete with Dracut; use --mdraid)"
   echo "	--multipath		Include Multipath support"
-  echo "	--splash		Enable framebuffer splash (splashutils);"
-  echo "				set up in /etc/conf.d/splash"
   echo "  Internal engine"
   echo "	--all-ramdisk-modules	Copy all kernel modules to the ramdisk"
   echo "	--do-keymap-auto	Forces keymap selection at boot"
   echo "	--no-keymap		Disables keymap selection support"
+  echo "	--splash		Enable framebuffer splash using default theme"
   echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
   echo "	--splash-res=<res>	Select splash theme resolutions to install"
+  echo "	--no-splash		Do not install framebuffer splash"
   echo "	--evms			Include EVMS support"
   echo "				--> 'emerge evms' in the host operating system"
   echo "				first"
@@ -110,16 +107,24 @@ longusage() {
   echo "	--generic		Build generic initramfs instead of"
   echo "				default hostonly.  Notice that generic => huge"
   echo "	--mdraid		Include RAID support via mdadm"
+  echo "	--gensplash		Enable framebuffer splash (splashutils);"
+  echo "				set up in /etc/conf.d/splash"
+  echo "	--gensplash=<theme>[:<res>]"
+  echo "				Enable framebuffer splash using <theme>"
+  echo "				and optionally select splash theme resolutions"
+  echo "				to install; <res> is comma-separated list of"
+  echo "				resolutions"
+  echo "	--no-gensplash		Do not install framebuffer splash"
+  echo "	--gensplash-no8bpp	Ignore 8bpp gensplash images (can save a lot of"
+  echo "				space)"
   echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
   echo "				configuration in /etc/plymouth/plymouthd.conf"
   echo "				requires >=plymouth-0.8.3 to be installed"
-  echo "	--gen2splash		Use old good Gentoo Splash (splashutils);"
-  echo "				set up in /etc/conf.d/splash"
-  echo "	--extra-modules=<modules list>"
+  echo "	--add-modules=<modules list>"
   echo "				Additional Dracut modules;"
   echo "				see /usr/share/dracut/modules.d for possible"
   echo "				values; separate modules by space, e.g.:"
-  echo "				--extra-modules=\"lvm crypt nfs\""
+  echo "				--add-modules=\"lvm crypt nfs\""
   echo "	--extra-options=<options>"
   echo "				Pass extra options to dracut;"
   echo "				see 'man 8 dracut'"
@@ -177,6 +182,8 @@ usage() {
 }
 
 parse_cmdline() {
+	local tmp
+
 	case "$*" in
 		--kernel-cc=*)
 			CMD_KERNEL_CC=`parse_opt "$*"`
@@ -347,54 +354,6 @@ parse_cmdline() {
 			CMD_OLDCONFIG=1
 			print_info 2 "CMD_CLEAN: ${CMD_CLEAN}"
 			print_info 2 "CMD_OLDCONFIG: ${CMD_OLDCONFIG}"
-			;;
-		--gensplash=*)
-			CMD_SPLASH=1
-			SPLASH_THEME=`parse_opt "$*"`
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			print_info 2 "SPLASH_THEME: ${SPLASH_THEME}"
-			echo
-			print_warning 1 "Please use --splash, as --gensplash is deprecated."
-			;;
-		--gensplash)
-			CMD_SPLASH=1
-			SPLASH_THEME='default'
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			echo
-			print_warning 1 "Please use --splash, as --gensplash is deprecated."
-			;;
-		--splash=*)
-			CMD_SPLASH=1
-			SPLASH_THEME=`parse_opt "$*"`
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			print_info 2 "SPLASH_THEME: ${SPLASH_THEME}"
-			;;
-		--splash)
-			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
-				CMD_GEN2SPLASH=1
-				print_info 2 "CMD_GEN2SPLASH: ${CMD_GEN2SPLASH}"
-				echo
-				print_warning 1 "Please use --gen2splash, as --splash is obsolete."
-				print_warning 1 "Set up splash in /etc/conf.d/splash"
-			else
-				CMD_SPLASH=1
-				SPLASH_THEME='default'
-				print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			fi
-			;;
-		--no-splash)
-			CMD_SPLASH=0
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			;;
-		--gensplash-res=*)
-			SPLASH_RES=`parse_opt "$*"`
-			print_info 2 "SPLASH_RES: ${SPLASH_RES}"
-			echo
-			print_warning 1 "Please use --splash-res, as --gensplash-res is deprecated."
-			;;
-		--splash-res=*)
-			SPLASH_RES=`parse_opt "$*"`
-			print_info 2 "SPLASH_RES: ${SPLASH_RES}"
 			;;
 		--install)
 			CMD_NOINSTALL=0
@@ -592,6 +551,25 @@ parse_cmdline() {
 			CMD_BUSYBOX_CONFIG=`parse_opt "$*"`
 			print_info 2 "CMD_BUSYBOX_CONFIG: ${CMD_BUSYBOX_CONFIG}"
 			;;
+		--splash=*)
+			CMD_SPLASH=1
+			SPLASH_THEME=`parse_opt "$*"`
+			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
+			print_info 2 "SPLASH_THEME: ${SPLASH_THEME}"
+			;;
+		--splash)
+			CMD_SPLASH=1
+			SPLASH_THEME='default'
+			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
+			;;
+		--no-splash)
+			CMD_SPLASH=0
+			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
+			;;
+		--splash-res=*)
+			SPLASH_RES=`parse_opt "$*"`
+			print_info 2 "SPLASH_RES: ${SPLASH_RES}"
+			;;
 
 	   	# Dracut engine
 		--no-dracut)
@@ -618,17 +596,28 @@ parse_cmdline() {
 			CMD_CRYPT=1
 			print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
 			;;
+		--gensplash)
+			CMD_GENSPLASH=1
+			print_info 2 "CMD_GENSPLASH: ${CMD_GENSPLASH}"
+			;;
+		--gensplash=*)
+			CMD_GENSPLASH=1
+			tmp=`parse_opt "$*"`
+			GENSPLASH_THEME=${tmp%%:*}
+			print_info 2 "GENSPLASH: ${GENSPLASH}"
+			print_info 2 "GENSPLASH_THEME: ${GENSPLASH_THEME}"
+			[[ ${tmp} =~ : ]] && {
+				GENSPLASH_RES=${tmp#*:}
+				print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
+			}
+			;;
 		--plymouth)
 			CMD_PLYMOUTH=1
 			print_info 2 "CMD_PLYMOUTH: ${CMD_PLYMOUTH}"
 			;;
-		--gen2splash)
-			CMD_GEN2SPLASH=1
-			print_info 2 "CMD_GEN2SPLASH: ${CMD_GEN2SPLASH}"
-			;;
-		--extra-modules=*)
-			CMD_EXTRA_MODULES=`parse_opt "$*"`
-			print_info 2 "CMD_EXTRA_MODULES: ${CMD_EXTRA_MODULES}"
+		--add-modules=*)
+			CMD_ADD_MODULES=`parse_opt "$*"`
+			print_info 2 "CMD_ADD_MODULES: ${CMD_ADD_MODULES}"
 			;;
 		--extra-options=*)
 			CMD_EXTRA_OPTIONS=`parse_opt "$*"`

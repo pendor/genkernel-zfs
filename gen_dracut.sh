@@ -3,7 +3,7 @@
 
 BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
 BASIC_MODULES+=\ udev-rules\ uswsusp\ base
-MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gen2splash
+MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gensplash
 
 dracut_modules() {
 	local a=() o=()
