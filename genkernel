@@ -338,23 +338,39 @@ then
 	print_info 1 "Kernel compiled successfully!"
 	print_info 1 ''
 	print_info 1 'Required Kernel Parameters:'
-	if [ "${BUILD_RAMDISK}" -eq '0' ]
+	if isTrue "${DRACUT}"
 	then
-		print_info 1 '    root=/dev/$ROOT'
-		print_info 1 '    [ And "vga=0x317 splash=verbose" if you use a framebuffer ]'
-		print_info 1 ''
-		print_info 1 '    Where $ROOT is the device node for your root partition as the'
-		print_info 1 '    one specified in /etc/fstab'
+		if [ "${BUILD_RAMDISK}" -eq '0' ]
+		then
+			print_info 1 '    root=/dev/$ROOT'
+			print_info 1 '    [ And "vga=0x317 splash=verbose" if you use a framebuffer ]'
+			print_info 1 ''
+			print_info 1 '    Where $ROOT is the device node for your root partition as the'
+			print_info 1 '    one specified in /etc/fstab'
+		else
+			print_info 1 '    real_root=/dev/$ROOT'
+			print_info 1 ''
+			print_info 1 '    Where $ROOT is the device node for your root partition as the'
+			print_info 1 '    one specified in /etc/fstab'
+			print_info 1 ''
+			print_info 1 "If you require Genkernel's hardware detection features; you MUST"
+			print_info 1 'tell your bootloader to use the provided INITRAMFS file. Otherwise;'
+			print_info 1 'substitute the root argument for the real_root argument if you are'
+			print_info 1 'not planning to use the initramfs...'
+		fi
 	else
-		print_info 1 '    real_root=/dev/$ROOT'
+		print_info 1 '    root=/dev/$ROOT'
 		print_info 1 ''
 		print_info 1 '    Where $ROOT is the device node for your root partition as the'
 		print_info 1 '    one specified in /etc/fstab'
-		print_info 1 ''
-		print_info 1 "If you require Genkernel's hardware detection features; you MUST"
-		print_info 1 'tell your bootloader to use the provided INITRAMFS file. Otherwise;'
-		print_info 1 'substitute the root argument for the real_root argument if you are'
-		print_info 1 'not planning to use the initramfs...'
+		[ "${BUILD_RAMDISK}" -eq '0' ] || {
+			print_info 1 ''
+			print_info 1 '    resume=/dev/$SWAP'
+			print_info 1 ''
+			print_info 1 '    Where $SWAP is the swap device used by hibernate software of your choice.'
+			print_info 1 ''
+			print_info 1 '    Please consult "man 7 dracut.kernel" for additional kernel arguments.'
+		}
 	fi
 fi
 
@@ -365,7 +381,7 @@ then
 	print_info 1 'Additional kernel cmdline arguments that *may* be required to boot properly...'
 	if isTrue "${DRACUT}"
 	then
-		echo
+		isTrue "${GENSPLASH}" && print_info 1 "add \"splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer"
 	else
 		[ "${SPLASH}" -eq '1' ] && print_info 1 "add \"vga=791 splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer ]"
 		[ "${LVM}" -eq '1' ] && print_info 1 'add "dolvm" for lvm support'
