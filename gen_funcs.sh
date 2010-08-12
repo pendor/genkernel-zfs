@@ -444,6 +444,7 @@ set_config_with_override() {
 	local CfgVar=$2
 	local OverrideVar=$3
 	local Default=$4
+	local CfgOldVar=$5
 	local Result
 
 	#
@@ -499,14 +500,14 @@ set_config_with_override() {
 	eval ${CfgVar}=\"${Result}\"
 }
 
-check_distfiles() {
-	for i in $BUSYBOX_SRCTAR $DEVICE_MAPPER_SRCTAR $MULTIPATH_SRCTAR $LVM_SRCTAR $DMRAID_SRCTAR $E2FSPROGS_SRCTAR $ISCSI_SRCTAR
-	do
-		if [ ! -f "${i}" ]
-		then
-			small_die "Could not find source tarball ${i}. Please refetch."
-		fi
-	done
+set_config_alias() {
+	local CfgOldVar=$1
+	local CfgVar=$2
+
+	if [ -n "${CfgVar}" -a -n "${CfgOldVar}" ]
+	then
+		eval "${CfgVar}='${!CfgOldVar}'"
+	fi
 }
 
 find_kernel_binary() {

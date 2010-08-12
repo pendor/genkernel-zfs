@@ -47,12 +47,7 @@ source ${GK_SHARE}/gen_arch.sh || gen_die "Could not read ${GK_SHARE}/gen_arch.s
 source ${GK_SHARE}/gen_determineargs.sh || gen_die "Could not read ${GK_SHARE}/gen_determineargs.sh"
 source ${GK_SHARE}/gen_compile.sh || gen_die "Could not read ${GK_SHARE}/gen_compile.sh"
 source ${GK_SHARE}/gen_configkernel.sh || gen_die "Could not read ${GK_SHARE}/gen_configkernel.sh"
-if isTrue "${DRACUT}"
-then
-	source ${GK_SHARE}/gen_initramfs.sh || gen_die "Could not read ${GK_SHARE}/gen_initramfs.sh"
-else
-	source ${GK_SHARE}/gen_dracut.sh || gen_die "Could not read ${GK_SHARE}/gen_dracut.sh"
-fi
+source ${GK_SHARE}/gen_dracut.sh || gen_die "Could not read ${GK_SHARE}/gen_dracut.sh"
 source ${GK_SHARE}/gen_moddeps.sh || gen_die "Could not read ${GK_SHARE}/gen_moddeps.sh"
 source ${GK_SHARE}/gen_package.sh || gen_die "Could not read ${GK_SHARE}/gen_package.sh"
 source ${GK_SHARE}/gen_bootloader.sh || gen_die "Could not read ${GK_SHARE}/gen_bootloader.sh"
@@ -66,21 +61,21 @@ trap_cleanup(){
 }
 
 cleanup(){
-    if [ -n "$TEMP" -a -d "$TEMP" ]; then
-	rm -rf "$TEMP"
-    fi
+ 	if [ -n "$TEMP" -a -d "$TEMP" ]; then
+		rm -rf "$TEMP"
+ 	fi
 
-    if isTrue ${POSTCLEAR}
-    then
-	    echo
-	    print_info 1 'RUNNING FINAL CACHE/TMP CLEANUP'
-	    print_info 1 "CACHE_DIR: ${CACHE_DIR}"
-	    CLEAR_CACHE_DIR='yes'
-	    setup_cache_dir
-	    echo
-	    print_info 1 "TMPDIR: ${TMPDIR}"
-	    clear_tmpdir
-	    fi
+	if isTrue ${POSTCLEAR}
+	then
+		echo
+		print_info 1 'RUNNING FINAL CACHE/TMP CLEANUP'
+		print_info 1 "CACHE_DIR: ${CACHE_DIR}"
+		CLEAR_CACHE_DIR='yes'
+		setup_cache_dir
+		echo
+		print_info 1 "TMPDIR: ${TMPDIR}"
+		clear_tmpdir
+	fi
 }
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
@@ -133,12 +128,6 @@ determine_real_args
 set_kernel_arch
 
 [ ! -f "${TEMP}" ] && mkdir -p "${TEMP}"
-
-if ! isTrue "${DRACUT}"
-then
-	setup_cache_dir
-	check_distfiles
-fi
 
 dump_debugcache
 
@@ -211,7 +200,7 @@ fi
 KERNCACHE_IS_VALID=0
 if [ "${KERNCACHE}" != "" ] 
 then
-    gen_kerncache_is_valid
+	gen_kerncache_is_valid
 fi
 
 if [ ${BUILD_KERNEL} -eq '1' -a "${KERNCACHE_IS_VALID}" == "0" ]
@@ -293,22 +282,6 @@ fi
 
 if [ "${BUILD_RAMDISK}" -eq '1' ]
 then
-	if ! isTrue "${DRACUT}"
-	then
-		[ "${DISKLABEL}" -eq '1' ] && compile_e2fsprogs
-
-		if [ "${BUSYBOX}" -eq '1' ]
-		then
-			# Compile Busybox
-			compile_busybox
-		fi
-
-		if isTrue "${UNIONFS}"
-		then
-			compile_unionfs_fuse
-		fi
-	fi
-
 	# Compile initramfs
 	create_initramfs
 else
@@ -337,74 +310,37 @@ then
 	print_info 1 ''
 	print_info 1 "Kernel compiled successfully!"
 	print_info 1 ''
-	if ! isTrue "${DRACUT}"
-	then
-		print_info 1 'Required Kernel Parameters:'
+fi
 
-		if [ "${BUILD_RAMDISK}" -eq '0' ]
-		then
-			print_info 1 '    root=/dev/$ROOT'
-			print_info 1 '    [ And "vga=0x317 splash=verbose" if you use a framebuffer ]'
-			print_info 1 ''
-			print_info 1 '    Where $ROOT is the device node for your root partition as the'
-			print_info 1 '    one specified in /etc/fstab'
-		else
-			print_info 1 '    real_root=/dev/$ROOT'
-			print_info 1 ''
-			print_info 1 '    Where $ROOT is the device node for your root partition as the'
-			print_info 1 '    one specified in /etc/fstab'
-			print_info 1 ''
-			print_info 1 "If you require Genkernel's hardware detection features; you MUST"
-			print_info 1 'tell your bootloader to use the provided INITRAMFS file. Otherwise;'
-			print_info 1 'substitute the root argument for the real_root argument if you are'
-			print_info 1 'not planning to use the initramfs...'
-		fi
-	fi
+if [ "${BUILD_KERNEL}" -eq '1' ] || [ "${BUILD_RAMDISK}" -eq '1' ]; then
+	print_info 1 'Required kernel arguments:'
+	print_info 1 ''
+	print_info 1 '    root=/dev/$ROOT'
+	print_info 1 ''
+	print_info 1 '    Where $ROOT is the device node for your root partition as the'
+	print_info 1 '    one specified in /etc/fstab'
 fi
 
 if [ "${BUILD_RAMDISK}" -eq '1' ]
 then
-	if isTrue "${DRACUT}"
-	then
-		print_info 1 'Required kernel arguments:'
-		print_info 1 ''
-		print_info 1 '    root=/dev/$ROOT'
-		print_info 1 ''
-		print_info 1 '    Where $ROOT is the device node for your root partition as the'
-		print_info 1 '    one specified in /etc/fstab'
-		[ "${BUILD_RAMDISK}" -eq '0' ] || {
-			print_info 1 ''
-			print_info 1 '    resume=/dev/$SWAP'
-			print_info 1 ''
-			print_info 1 '    Where $SWAP is the swap device used by hibernate software of your choice.'
-			print_info 1 ''
-			print_info 1 '    Please consult "man 7 dracut.kernel" for additional kernel arguments.'
-		}
-	fi
-
 	echo
 	print_info 1 'WARNING... WARNING... WARNING...'
 	print_info 1 'Additional kernel cmdline arguments that *may* be required to boot properly...'
-	if isTrue "${DRACUT}"
-	then
-		isTrue "${GENSPLASH}" && print_info 1 "add \"splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer"
-	else
-		[ "${SPLASH}" -eq '1' ] && print_info 1 "add \"vga=791 splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer ]"
-		[ "${LVM}" -eq '1' ] && print_info 1 'add "dolvm" for lvm support'
-		[ "${EVMS}" -eq '1' ] && print_info 1 'add "doevms" for evms support'
-		[ "${DMRAID}" -eq '1' ] && print_info 1 'add "dodmraid" for dmraid support'
-		[ "${DMRAID}" -eq '1' ] && print_info 1 '	or "dodmraid=<additional options>"'
-		[ "${ISCSI}" -eq '1' ] && print_info 1 'add at least "iscsi_initiatorname=<initiator name> iscsi_target=<target name> and iscsi_address=<target ip>" for iscsi support'
-	fi
+	echo
+	print_info 1 'If you use hibernation:'
+	print_info 1 ''
+	print_info 1 '    resume=/dev/$SWAP'
+	print_info 1 ''
+	print_info 1 '    Where $SWAP is the swap device used by hibernate software of your choice.'
+	print_info 1 ''
+	print_info 1 '    Please consult "man 7 dracut.kernel" for additional kernel arguments.'
+
+	isTrue "${GENSPLASH}" && print_info 1 "add \"splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer"
 fi
 
-[ "${BOOTRW}" != '' ] && mount -o remount,ro ${BOOTDIR}
-
 echo
-print_info 1 'Do NOT report kernel bugs as genkernel bugs unless your bug'
-print_info 1 'is about the default genkernel configuration...'
-print_info 1 ''
-print_info 1 'Make sure you have the latest genkernel before reporting bugs.'
+
+[ "${BOOTRW}" != '' ] && mount -o remount,ro ${BOOTDIR}
 
 #Final Cleanup
 cleanup

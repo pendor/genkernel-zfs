@@ -38,7 +38,6 @@ longusage() {
   echo "	--no-install		Do not install the kernel after building"
   echo "	--symlink		Manage symlinks in /boot for installed images"
   echo "	--no-symlink		Do not manage symlinks"
-  echo "	--no-ramdisk-modules	Don't copy any modules to the ramdisk"
   echo "	--callback=<...>	Run the specified arguments after the"
   echo "				kernel and modules have been compiled"
   echo "	--static		Build a static (monolithic kernel)."
@@ -53,81 +52,70 @@ longusage() {
   echo "	--kernel-ld=<linker>	Linker to use for kernel"
   echo "	--kernel-cross-compile=<cross var> CROSS_COMPILE kernel variable"
   echo "	--kernel-make=<makeprg> GNU Make to use for kernel"
-  echo "	--utils-cc=<compiler>	Compiler to use for utilities"
-  echo "	--utils-as=<assembler>	Assembler to use for utils"
-  echo "	--utils-ld=<linker>	Linker to use for utils"
-  echo "	--utils-make=<makeprog>	GNU Make to use for utils"
-  echo "	--utils-cross-compile=<cross var> CROSS_COMPILE utils variable"
-  echo "	--utils-arch=<arch> 	Force to arch for utils only instead of"
-  echo "				autodetect."
   echo "	--makeopts=<makeopts>	Make options such as -j2, etc..."
   echo "	--mountboot		Mount BOOTDIR automatically if mountable"
   echo "	--no-mountboot		Don't mount BOOTDIR automatically"
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
   echo "	--bootloader=grub	Add new kernel to GRUB configuration"
-  echo "	--dmraid		Include DMRAID support"
-  echo "	--iscsi			Include iSCSI support"
-  echo "	--luks			Include LUKS support"
-  echo "				--> 'emerge cryptsetup-luks' with USE=-dynamic"
-  echo "	--lvm			Include LVM support"
-  echo "	--mdadm			Copy /etc/mdadm.conf to initramfs"
-  echo "				(obsolete with Dracut; use --mdraid)"
-  echo "	--multipath		Include Multipath support"
-  echo "  Internal engine"
-  echo "	--all-ramdisk-modules	Copy all kernel modules to the ramdisk"
-  echo "	--do-keymap-auto	Forces keymap selection at boot"
-  echo "	--no-keymap		Disables keymap selection support"
-  echo "	--splash		Enable framebuffer splash using default theme"
-  echo "	--splash=<theme>	Enable framebuffer splash using <theme>"
-  echo "	--splash-res=<res>	Select splash theme resolutions to install"
-  echo "	--no-splash		Do not install framebuffer splash"
-  echo "	--evms			Include EVMS support"
-  echo "				--> 'emerge evms' in the host operating system"
-  echo "				first"
-  echo "	--slowusb		Enables extra pauses for slow USB CD boots"
-  echo "	--no-busybox		Do not include busybox in the initramfs."
-  echo "	--unionfs		Include EXPERIMENTAL support for unionfs"
-  echo "	--netboot		Create a self-contained env in the initramfs"
-  echo "	--real-root=<foo>	Specify a default for real_root="
-  echo "	--linuxrc=<file>	Specifies a user created linuxrc"
-  echo "	--busybox-config=<file>	Specifies a user created busybox config"
-  echo "	--disklabel		Include disk label and uuid support in your"
-  echo "				ramdisk"
   echo "  Dracut engine"
-  echo "	--no-dracut		Build system using old internal engine"
-  echo "				(will be removed in the future)"
-  echo "	--dracut-dir=<dir>	Directory of Dracut sources; if given Dracut"
-  echo "				is run in local mode (see description of '-l'"
-  echo "				in 'man 8 dracut'); script changes current"
-  echo "				directory to <dir>, so don't use relative"
-  echo "				paths then"
-  echo "	--auto			Rely on Dracut system check instead of"
-  echo "				specifying modules by hand"
-  echo "	--generic		Build generic initramfs instead of"
-  echo "				default hostonly.  Notice that generic => huge"
-  echo "	--mdraid		Include RAID support via mdadm"
-  echo "	--gensplash		Enable framebuffer splash (splashutils);"
-  echo "				set up in /etc/conf.d/splash"
-  echo "	--gensplash=<theme>[:<res>]"
-  echo "				Enable framebuffer splash using <theme>"
-  echo "				and optionally select splash theme resolutions"
-  echo "				to install; <res> is comma-separated list of"
-  echo "				resolutions"
-  echo "	--no-gensplash		Do not install framebuffer splash"
-  echo "	--gensplash-no8bpp	Ignore 8bpp gensplash images (can save a lot of"
-  echo "				space)"
-  echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
-  echo "				configuration in /etc/plymouth/plymouthd.conf"
-  echo "				requires >=plymouth-0.8.3 to be installed"
   echo "	--add-modules=<modules list>"
   echo "				Additional Dracut modules;"
   echo "				see /usr/share/dracut/modules.d for possible"
   echo "				values; separate modules by space, e.g.:"
   echo "				--add-modules=\"lvm crypt nfs\""
+  echo "	--auto			Rely on Dracut system check instead of"
+  echo "				specifying modules by hand"
+  echo "	--crypt			Include LUKS support"
+  echo "				--> 'emerge cryptsetup-luks'"
+  echo "	--no-ramdisk-modules	Don't copy any modules to the ramdisk"
+  echo "	--dmraid		Include DMRAID support"
+  echo "	--dracut-dir=<dir>	Directory of Dracut sources; if given Dracut"
+  echo "				is run in local mode (see description of '-l'"
+  echo "				in 'man 8 dracut'); script changes current"
+  echo "				directory to <dir>, so don't use relative"
+  echo "				paths then"
+  echo "	--evms			Include EVMS support"
+  echo "				--> 'emerge evms' in the host operating system"
+  echo "				first"
   echo "	--extra-options=<options>"
   echo "				Pass extra options to dracut;"
   echo "				see 'man 8 dracut'"
+  echo "	--fbsplash		Enable framebuffer splash (splashutils);"
+  echo "				set up in /etc/conf.d/splash"
+  echo "	--fbsplash=<theme>[:<res>]"
+  echo "				Enable framebuffer splash using <theme>"
+  echo "				and optionally select splash theme resolutions"
+  echo "				to install; <res> is comma-separated list of"
+  echo "				resolutions"
+  echo "	--fbsplash-no8bpp	Ignore 8 bpp splash images (can save a lot of"
+  echo "				space)"
+  echo "	--fbsplash-res=<res>"
+  echo "				Splash theme resolutions to install; <res> is"
+  echo "				comma-separated list of resolutions"
+  echo "	--firmware"
+  echo "				Enable copying of firmware into initramfs"
+  echo "	--firmware-dir=<dir>"
+  echo "				Specify directory to copy firmware from (defaults"
+  echo "				to /lib/firmware)"
+  echo "	--firmware-files=<files>"
+  echo "				Specifies specific firmware files to copy. This"
+  echo "				overrides --firmware-dir. For multiple files,"
+  echo "				separate the filenames with a comma"
+  echo "	--generic		Build generic initramfs instead of"
+  echo "				default hostonly.  Notice that generic => huge"
+  echo "	--initramfs-overlay=<dir>"
+  echo "				Directory structure to include in the initramfs,"
+  echo "				only available on 2.6 kernels"
+  echo "	--iscsi			Include iSCSI support"
+  echo "	--lvm			Include LVM support"
+  echo "	--mdraid		Include RAID support via mdadm"
+  echo "	--multipath		Include Multipath support"
+  echo "	--no-fbsplash		Do not install framebuffer splash"
+  echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
+  echo "				configuration in /etc/plymouth/plymouthd.conf"
+  echo "				requires >=plymouth-0.8.3 to be installed"
+  echo "	--unionfs		Include EXPERIMENTAL support for unionfs"
   echo "  Internals"
   echo "	--arch-override=<arch>	Force to arch instead of autodetect"
   echo "	--cachedir=<dir>	Override the default cache location"
@@ -149,18 +137,6 @@ longusage() {
   echo "	--no-kernel-sources	This option is only valid if kerncache is"
   echo "				defined. If there is a valid kerncache no checks"
   echo "				will be made against a kernel source tree"
-  echo "	--initramfs-overlay=<dir>"
-  echo "				Directory structure to include in the initramfs,"
-  echo "				only available on 2.6 kernels"
-  echo "	--firmware"
-  echo "				Enable copying of firmware into initramfs"
-  echo "	--firmware-dir=<dir>"
-  echo "				Specify directory to copy firmware from (defaults"
-  echo "				to /lib/firmware)"
-  echo "	--firmware-files=<files>"
-  echo "				Specifies specific firmware files to copy. This"
-  echo "				overrides --firmware-dir. For multiple files,"
-  echo "				separate the filenames with a comma"
   echo "	--integrated-initramfs"
   echo "				Build the generated initramfs into the kernel instead of"
   echo "				keeping it as a separate file"
@@ -206,31 +182,6 @@ parse_cmdline() {
 			CMD_KERNEL_CROSS_COMPILE=$(echo ${CMD_KERNEL_CROSS_COMPILE}|sed -e 's/.*[^-]$/&-/g')
 			print_info 2 "CMD_KERNEL_CROSS_COMPILE: ${CMD_KERNEL_CROSS_COMPILE}"
 			;;
-		--utils-cc=*)
-			CMD_UTILS_CC=`parse_opt "$*"`
-			print_info 2 "CMD_UTILS_CC: ${CMD_UTILS_CC}"
-			;;
-		--utils-ld=*)
-			CMD_UTILS_LD=`parse_opt "$*"`
-			print_info 2 "CMD_UTILS_LD: ${CMD_UTILS_LD}"
-			;;
-		--utils-as=*)
-			CMD_UTILS_AS=`parse_opt "$*"`
-			print_info 2 "CMD_UTILS_AS: ${CMD_UTILS_AS}"
-			;;
-		--utils-make=*)
-			CMD_UTILS_MAKE=`parse_opt "$*"`
-			print_info 2 "CMD_UTILS_MAKE: ${CMD_UTILS_MAKE}"
-			;;
-		--utils-cross-compile=*)
-			CMD_UTILS_CROSS_COMPILE=`parse_opt "$*"`
-			CMD_UTILS_CROSS_COMPILE=$(echo ${CMD_UTILS_CROSS_COMPILE}|sed -e 's/.*[^-]$/&-/g')
-			print_info 2 "CMD_UTILS_CROSS_COMPILE: ${CMD_UTILS_CROSS_COMPILE}"
-			;;
-		--utils-arch=*)
-			CMD_UTILS_ARCH=`parse_opt "$*"`
-			print_info 2 "CMD_UTILS_ARCH: ${CMD_ARCHOVERRIDE}"
-			;;
 		--makeopts=*)
 			CMD_MAKEOPTS=`parse_opt "$*"`
 			print_info 2 "CMD_MAKEOPTS: ${CMD_MAKEOPTS}"
@@ -247,54 +198,10 @@ parse_cmdline() {
 			CMD_BOOTDIR=`parse_opt "$*"`
 			print_info 2 "CMD_BOOTDIR: ${CMD_BOOTDIR}"
 			;;
-		--lvm)
-			CMD_LVM=1
-			print_info 2 "CMD_LVM: ${CMD_LVM}"
-			;;
-		--lvm2)
-			CMD_LVM=1
-			print_info 2 "CMD_LVM: ${CMD_LVM}"
-			echo
-			print_warning 1 "Please use --lvm, as --lvm2 is deprecated."
-			;;
-		--mdadm)
-			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
-				CMD_MDRAID=1
-				print_info 2 "CMD_MDRAID: $CMD_MDRAID"
-				echo
-				print_warning 1 "Please use --mdraid, as --mdadm is obsolete."
-			else
-				CMD_MDADM=1
-				print_info 2 "CMD_MDADM: $CMD_MDADM"
-			fi
-			;;
-		--dmraid)
-			if [ ! -e /usr/include/libdevmapper.h ]
-			then
-				echo 'Error: --dmraid requires device-mapper to be installed'
-				echo '		 on the host system; try "emerge device-mapper".'
-				exit 1
-			fi
-			CMD_DMRAID=1
-			print_info 2 "CMD_DMRAID: ${CMD_DMRAID}"
-			;;
-		--multipath)
-			if [ ! -e /usr/include/libdevmapper.h ]
-			then
-				echo 'Error: --multipath requires device-mapper to be installed'
-				echo '		 on the host;system; try "emerge device-mapper".'
-				exit 1
-			fi
-			CMD_MULTIPATH=1
-			print_info 2 "CMD_MULTIPATH: ${CMD_MULTIPATH}"
-			;;
+
 		--bootloader=*)
 			CMD_BOOTLOADER=`parse_opt "$*"`
 			print_info 2 "CMD_BOOTLOADER: ${CMD_BOOTLOADER}"
-			;;
-		--iscsi)
-			CMD_ISCSI=1
-			print_info 2 "CMD_ISCSI: ${CMD_ISCSI}"
 			;;
 		--loglevel=*)
 			CMD_LOGLEVEL=`parse_opt "$*"`
@@ -362,10 +269,6 @@ parse_cmdline() {
 		--no-install)
 			CMD_NOINSTALL=1
 			print_info 2 "CMD_NOINSTALL: ${CMD_NOINSTALL}"
-			;;
-		--no-ramdisk-modules)
-			CMD_NORAMDISKMODULES=1
-			print_info 2 "CMD_NORAMDISKMODULES: ${CMD_NORAMDISKMODULES}"
 			;;
 		--callback=*)
 			CMD_CALLBACK=`parse_opt "$*"`
@@ -449,10 +352,6 @@ parse_cmdline() {
 			CMD_NO_KERNEL_SOURCES=1
 			print_info 2 "CMD_NO_KERNEL_SOURCES: ${CMD_NO_KERNEL_SOURCES}"
 			;;
-		--initramfs-overlay=*)
-			CMD_INITRAMFS_OVERLAY=`parse_opt "$*"`
-			print_info 2 "CMD_INITRAMFS_OVERLAY: ${CMD_INITRAMFS_OVERLAY}"
-			;;
 		--genzimage)
 			KERNEL_MAKE_DIRECTIVE_2='zImage.initrd'
 			KERNEL_BINARY_2='arch/powerpc/boot/zImage.initrd'
@@ -460,16 +359,61 @@ parse_cmdline() {
 #			ENABLE_PEGASOS_HACKS="yes"
 #			print_info 2 "ENABLE_PEGASOS_HACKS: ${ENABLE_PEGASOS_HACKS}"
 			;;
-		--luks)
-			if ! [[ "${CMD_DRACUT}" = '0' ]] && ! [[ $* =~ --no-dracut ]]; then
-				CMD_CRYPT=1
-				print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
-				echo
-				print_warning 1 "Please use --crypt, as --luks is obsolete."
-			else
-				CMD_LUKS=1
-				print_info 2 "CMD_LUKS: ${CMD_LUKS}"
+		--config=*)
+			print_info 2 "CMD_GK_CONFIG: `parse_opt "$*"`"
+			;;
+		--local)
+		;;
+
+	   	# Dracut engine
+		--auto)
+			CMD_AUTO=1
+			print_info 2 "CMD_AUTO: ${CMD_AUTO}"
+			;;
+		--crypt|--luks)
+			CMD_CRYPT=1
+			print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
+			;;
+		--dmraid)
+			if [ ! -e /usr/include/libdevmapper.h ]
+			then
+				echo 'Error: --dmraid requires device-mapper to be installed'
+				echo '		 on the host system; try "emerge device-mapper".'
+				exit 1
 			fi
+			CMD_DMRAID=1
+			print_info 2 "CMD_DMRAID: ${CMD_DMRAID}"
+			;;
+		--dracut-dir=*)
+			CMD_DRACUT_DIR=`parse_opt "$*"`
+			print_info 2 "CMD_DRACUT_DIR: ${CMD_DRACUT_DIR}"
+			;;
+		--evms)
+			CMD_EVMS=1
+			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
+			;;
+		--extra-options=*)
+			CMD_EXTRA_OPTIONS=`parse_opt "$*"`
+			print_info 2 "CMD_EXTRA_OPTIONS: ${CMD_EXTRA_OPTIONS}"
+			;;
+		--fbsplash|--gensplash|--splash)
+			CMD_GENSPLASH=1
+			print_info 2 "CMD_GENSPLASH: ${CMD_GENSPLASH}"
+			;;
+		--fbsplash=*|--gensplash=*|--splash=*)
+			CMD_GENSPLASH=1
+			tmp=`parse_opt "$*"`
+			GENSPLASH_THEME=${tmp%%:*}
+			print_info 2 "GENSPLASH: ${GENSPLASH}"
+			print_info 2 "GENSPLASH_THEME: ${GENSPLASH_THEME}"
+			[[ ${tmp} =~ : ]] && {
+				GENSPLASH_RES=${tmp#*:}
+				print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
+			}
+			;;
+		--fbsplash-res=*|--gensplash=*|--splash=*)
+			GENSPLASH_RES=`parse_opt "$*"`
+			print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
 			;;
 		--firmware)
 			CMD_FIRMWARE=1
@@ -485,143 +429,55 @@ parse_cmdline() {
 			CMD_FIRMWARE=1
 			print_info 2 "CMD_FIRMWARE_FILES: ${CMD_FIRMWARE_FILES}"
 			;;
-		--integrated-initramfs)
-			CMD_INTEGRATED_INITRAMFS=1
-			print_info 2 "CMD_INTEGRATED_INITRAMFS=${CMD_INTEGRATED_INITRAMFS}"
-			;;
-		--config=*)
-			print_info 2 "CMD_GK_CONFIG: `parse_opt "$*"`"
-			;;
-		--local)
-		;;
-
-		# Internal engine
-		--no-busybox)
-			CMD_BUSYBOX=0
-			print_info 2 "CMD_BUSYBOX: ${CMD_BUSYBOX}"
-			;;
-		--unionfs)
-			CMD_UNIONFS=1
-			print_info 2 "CMD_UNIONFS: ${CMD_UNIONFS}"
-			;;
-		--netboot)
-			CMD_NETBOOT=1
-			print_info 2 "CMD_NETBOOT: ${CMD_NETBOOT}"
-			;;
-		--real-root=*)
-			CMD_REAL_ROOT=`parse_opt "$*"`
-			print_info 2 "CMD_REAL_ROOT: ${CMD_REAL_ROOT}"
-			;;
-		--slowusb)
-			CMD_SLOWUSB=1
-			print_info 2 "CMD_SLOWUSB: ${CMD_SLOWUSB}"
-			;;
-		--do-keymap-auto)
-			CMD_DOKEYMAPAUTO=1
-			CMD_KEYMAP=1
-			print_info 2 "CMD_DOKEYMAPAUTO: ${CMD_DOKEYMAPAUTO}"
-			;;
-		--no-keymap)
-			CMD_KEYMAP=0
-			print_info 2 "CMD_KEYMAP: ${CMD_KEYMAP}"
-			;;
-		--evms)
-			CMD_EVMS=1
-			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
-			;;
-		--evms2)
-			CMD_EVMS=1
-			print_info 2 "CMD_EVMS: ${CMD_EVMS}"
-			echo
-			print_warning 1 "Please use --evms, as --evms2 is deprecated."
-			;;
-		--disklabel)
-			CMD_DISKLABEL=1
-			print_info 2 "CMD_DISKLABEL: ${CMD_DISKLABEL}"
-			;;
-		--all-ramdisk-modules)
-			CMD_ALLRAMDISKMODULES=1
-			print_info 2 "CMD_ALLRAMDISKMODULES: ${CMD_ALLRAMDISKMODULES}"
-			;;
-		--linuxrc=*)
-			CMD_LINUXRC=`parse_opt "$*"`
-			print_info 2 "CMD_LINUXRC: ${CMD_LINUXRC}"
-			;;
-		--busybox-config=*)
-			CMD_BUSYBOX_CONFIG=`parse_opt "$*"`
-			print_info 2 "CMD_BUSYBOX_CONFIG: ${CMD_BUSYBOX_CONFIG}"
-			;;
-		--splash=*)
-			CMD_SPLASH=1
-			SPLASH_THEME=`parse_opt "$*"`
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			print_info 2 "SPLASH_THEME: ${SPLASH_THEME}"
-			;;
-		--splash)
-			CMD_SPLASH=1
-			SPLASH_THEME='default'
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			;;
-		--no-splash)
-			CMD_SPLASH=0
-			print_info 2 "CMD_SPLASH: ${CMD_SPLASH}"
-			;;
-		--splash-res=*)
-			SPLASH_RES=`parse_opt "$*"`
-			print_info 2 "SPLASH_RES: ${SPLASH_RES}"
-			;;
-
-	   	# Dracut engine
-		--no-dracut)
-			CMD_DRACUT=0
-			print_info 2 "CMD_DRACUT: ${CMD_DRACUT}"
-			;;
-		--dracut-dir=*)
-			CMD_DRACUT_DIR=`parse_opt "$*"`
-			print_info 2 "CMD_DRACUT_DIR: ${CMD_DRACUT_DIR}"
-			;;
-		--auto)
-			CMD_AUTO=1
-			print_info 2 "CMD_AUTO: ${CMD_AUTO}"
-			;;
 		--generic)
 			CMD_GENERIC=1
 			print_info 2 "CMD_GENERIC: ${CMD_GENERIC}"
 			;;
-		--mdraid)
+		--initramfs-overlay=*)
+			CMD_INITRAMFS_OVERLAY=`parse_opt "$*"`
+			print_info 2 "CMD_INITRAMFS_OVERLAY: ${CMD_INITRAMFS_OVERLAY}"
+			;;
+		--integrated-initramfs)
+			CMD_INTEGRATED_INITRAMFS=1
+			print_info 2 "CMD_INTEGRATED_INITRAMFS=${CMD_INTEGRATED_INITRAMFS}"
+			;;
+		--iscsi)
+			CMD_ISCSI=1
+			print_info 2 "CMD_ISCSI: ${CMD_ISCSI}"
+			;;
+		--lvm)
+			CMD_LVM=1
+			print_info 2 "CMD_LVM: ${CMD_LVM}"
+			;;
+		--mdraid|--mdadm)
 			CMD_MDRAID=1
 			print_info 2 "CMD_MDRAID: ${CMD_MDRAID}"
 			;;
-		--crypt)
-			CMD_CRYPT=1
-			print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
+		--multipath)
+			if [ ! -e /usr/include/libdevmapper.h ]
+			then
+				echo 'Error: --multipath requires device-mapper to be installed'
+				echo '		 on the host;system; try "emerge device-mapper".'
+				exit 1
+			fi
+			CMD_MULTIPATH=1
+			print_info 2 "CMD_MULTIPATH: ${CMD_MULTIPATH}"
 			;;
-		--gensplash)
-			CMD_GENSPLASH=1
+		--no-fbsplash|--no-gensplash|--no-splash)
+			CMD_GENSPLASH=0
 			print_info 2 "CMD_GENSPLASH: ${CMD_GENSPLASH}"
 			;;
-		--gensplash=*)
-			CMD_GENSPLASH=1
-			tmp=`parse_opt "$*"`
-			GENSPLASH_THEME=${tmp%%:*}
-			print_info 2 "GENSPLASH: ${GENSPLASH}"
-			print_info 2 "GENSPLASH_THEME: ${GENSPLASH_THEME}"
-			[[ ${tmp} =~ : ]] && {
-				GENSPLASH_RES=${tmp#*:}
-				print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
-			}
+		--no-ramdisk-modules)
+			CMD_NORAMDISKMODULES=1
+			print_info 2 "CMD_NORAMDISKMODULES: ${CMD_NORAMDISKMODULES}"
 			;;
 		--plymouth)
 			CMD_PLYMOUTH=1
 			print_info 2 "CMD_PLYMOUTH: ${CMD_PLYMOUTH}"
 			;;
-		--add-modules=*)
-			CMD_ADD_MODULES=`parse_opt "$*"`
-			print_info 2 "CMD_ADD_MODULES: ${CMD_ADD_MODULES}"
-			;;
-		--extra-options=*)
-			CMD_EXTRA_OPTIONS=`parse_opt "$*"`
-			print_info 2 "CMD_EXTRA_OPTIONS: ${CMD_EXTRA_OPTIONS}"
+		--unionfs)
+			CMD_UNIONFS=1
+			print_info 2 "CMD_UNIONFS: ${CMD_UNIONFS}"
 			;;
 
 		all)

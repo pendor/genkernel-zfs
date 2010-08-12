@@ -8,7 +8,7 @@ MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gensplash
 dracut_modules() {
 	local a=() o=()
 
-	isTrue "${PLYMOUTH}" && isTrue "${GENSPLASH}" && gen_die 'Gentoo Splash and Plymouth selected!  You cannot choose both splash engines.'
+	isTrue "${PLYMOUTH}" && isTrue "${GENSPLASH}" && gen_die 'Framebuffer Splash and Plymouth selected!  You cannot choose both splash engines.'
 	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 

@@ -217,7 +217,7 @@ CONFIG_BOUNCE=y
 CONFIG_VIRT_TO_BUS=y
 CONFIG_PROC_DEVICETREE=y
 CONFIG_CMDLINE_BOOL=y
-CONFIG_CMDLINE="console=ttyS0,115200,8n1 console=tty0 init=/linuxrc looptype=squashfs loop=/image.squashfs cdroot root=/dev/ram"
+CONFIG_CMDLINE="console=ttyS0,115200,8n1 console=tty0 init=/init looptype=squashfs loop=/image.squashfs cdroot root=/dev/ram"
 CONFIG_PM=y
 CONFIG_PM_LEGACY=y
 # CONFIG_PM_DEBUG is not set

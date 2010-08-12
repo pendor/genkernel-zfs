@@ -113,7 +113,7 @@ config_kernel() {
 		sed -i ${KERNEL_DIR}/.config -e 's/CONFIG_SCSI_ISCSI_ATTRS=y/CONFIG_SCSI_ISCSI_ATTRS=m/g'
 	fi
 
-	if isTrue ${SPLASH}
+	if isTrue ${GENSPLASH}
 	then
 		sed -i ${KERNEL_DIR}/.config -e 's/#\? \?CONFIG_FB_SPLASH is.*/CONFIG_FB_SPLASH=y/g'
 	fi
