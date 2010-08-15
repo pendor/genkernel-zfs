@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<reference xmlns="http://docbook.org/ns/docbook" version="5.0" xml:lang="en">
+    <refentry xml:id="genkernel">
+        <info>
+            <title>Gentoo Linux</title>
+            <productname>Genkernel</productname>
+            <authorgroup>
+                <author>
+                    <contrib>Developer</contrib>
+                    <firstname>Tim</firstname>
+                    <surname>Yamin</surname>
+                    <email>plasmaroo@gentoo.org</email>
+                </author>
+                <author>
+                    <contrib>Developer</contrib>
+                    <firstname>Eric</firstname>
+                    <surname>Edgar</surname>
+                    <email>rocket@gentoo.org</email>
+                </author>
+                <author>
+                    <contrib>NFS Support</contrib>
+                    <firstname>Thomas</firstname>
+                    <surname>Seiler</surname>
+                    <email>thseiler@gmail.com</email>
+                </author>
+            </authorgroup>
+        </info>
+        <refmeta>
+            <refentrytitle>genkernel</refentrytitle>
+            <manvolnum>8</manvolnum>
+        </refmeta>
+        <refnamediv>
+            <refname>genkernel</refname>
+            <refpurpose>the Gentoo Linux automatic kernel compiler and initramfs builder</refpurpose>
+            <refclass>Gentoo Linux</refclass>
+        </refnamediv>
+        <refsynopsisdiv>
+            <cmdsynopsis>
+                <command>genkernel</command>
+                <arg>options</arg>
+                <group choice="req">
+                    <arg>all</arg>
+                    <arg>bzImage</arg>
+                    <arg>kernel</arg>
+                    <arg>initramfs</arg>
+                </group>
+            </cmdsynopsis>
+        </refsynopsisdiv>
+        <refsect1>
+            <title>Description</title>
+            <para>
+                Genkernel is designed to allow users who are not previously
+                used to compiling a kernel to use a similar setup to that one
+                that is used on the Gentoo LiveCDs which auto-detects your
+                hardware.
+            </para>
+            <para>
+                Some users may also be interested in using Genkernel for
+                hardware which requires initialization and a working kernel
+                before it can be booted because Genkernel also automatically
+                compiles your kernel modules, allowing hardware which needs to
+                be loaded with module parameters to be used.
+            </para>
+        </refsect1>
+        <refsect1>
+            <title>Usage</title>
+            <para>
+                All that is needed to run Genkernel is just
+                <command>genkernel</command> with an action and any flags you
+                might need:
+                <programlisting>
+# genkernel --menuconfig --no-clean --no-install all
+                </programlisting>
+                This would produce a kernel, asking you what how to configure it to your desire, leaving alone any existing compiled object files, but not installing anything.
+            </para>
+            <refsect2>
+                <title>Actions</title>
+                <para>An action tells genkernel what you want it to do – the following actions are supported:</para>
+                <variablelist>
+                    <varlistentry>
+                        <term>
+                            <option>all</option>
+                        </term>
+                        <listitem>
+                            <para>Build all steps – the kernel, modules, and the ramdisk.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <option>bzImage</option>
+                        </term>
+                        <listitem>
+                            <para>Build only the kernel.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <option>kernel</option>
+                        </term>
+                        <listitem>
+                            <para>Build only the kernel and the modules.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>
+                            <option>initramfs</option>
+                        </term>
+                        <listitem>
+                            <para>Build only the ramdisk.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+            </refsect2>
+            <refsect2>
+                <title>Options</title>
+                <para>
+                    Genkernel supports the following options which alter its
+                    behaviour. Certain options have <option>--no-</option>
+                    variants which do the opposite thing. You can specify your
+                    options in any order.
+                </para>
+                <variablelist>
+                    <!-- FIXME: Change title to sth less stupid in this context -->
+                    <title>Configuration</title>
+                    <varlistentry>
+                        <term><option>--local</option></term>
+                        <listitem>
+                            <para>
+                                Enable local mode. Modules from current
+                                directory will be sourced instead of the ones
+                                from <filename>/usr/share/genkernel</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--config=<replaceable class="parameter">file</replaceable></option></term>
+                        <listitem>
+                            <para>Genkernel configuration file to use.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Debugging</title>
+                    <varlistentry>
+                        <term><option>--loglevel=<replaceable class="parameter">0-5</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                This controls the out verbosity level of
+                                genkernel output. If this is set to 0,
+                                minimal debugging is done; if this is set
+                                to 5 as much output as possible is given.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--logfile=<replaceable class="parameter">outfile</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                This outputs debugging data to the file
+                                <replaceable class="parameter">outfile</replaceable>.
+                                By default this is
+                                <filename>/var/log/genkernel.log</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>color</option></term>
+                        <listitem>
+                            <para>
+                                Turns on, or off, output in color using escape sequences.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Kernel configuration</title>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>menuconfig</option></term>
+                        <listitem>
+                            <para>
+                                Runs, or does not run
+                                <command>make menuconfig</command> after
+                                running <command>make oldconfig</command>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--gconfig</option></term>
+                        <listitem>
+                            <para>
+                                Run <command>make gconfig</command> after
+                                <command>make oldconfig</command>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--xconfig</option></term>
+                        <listitem>
+                            <para>
+                                Run <command>make xconfig</command> after
+                                <command>make oldconfig</command>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>save-config</option></term>
+                        <listitem>
+                            <para>
+                                Saves, or does not save the kernel
+                                configuration to
+                                <filename>/etc/kernels</filename> if the kernel
+                                is successfully compiled.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Kernel compilation</title>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>clean</option></term>
+                        <listitem>
+                            <para>
+                                Runs, or does not run,
+                                <command>make clean</command> before
+                                compilation – this erases any compiled object
+                                files in the kernel source tree but does not
+                                have an impact on the kernel configuration.
+                                Specifying <option>--no-clean</option> implies
+                                <option>--no-mrproper</option>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>mrproper</option></term>
+                        <listitem>
+                            <para>
+                                Runs, or does not run,
+                                <command>make mrproper</command> before
+                                compilation – this erases both any compiled
+                                object files in the kernel source tree as well
+                                as the kernel configuration.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--oldconfig</option></term>
+                        <listitem>
+                            <para>
+                                Implies <option>--no-clean</option>, and thus
+                                <option>--no-mrproper</option>, running a
+                                <command>make oldconfig</command>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>install</option></term>
+                        <listitem>
+                            <para>
+                                Installs, or does not install the kernel to
+                                <filename>/boot</filename> after building. The
+                                default is <option>--install</option>.
+                                If <varname>MOUNTBOOT</varname> is set in
+                                <filename>/etc/genkernel.conf</filename> then
+                                <filename>/boot</filename> will be
+                                automatically mounted if it is not already
+                                mounted before the ramdisk and kernel images
+                                are copied over.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>symlink</option></term>
+                        <listitem>
+                            <para>
+                                Manages, or does not manage, symlinks in
+                                <filename>/boot</filename> like the manual
+                                kernel <command>make install</command> process
+                                does. A <filename>kernel</filename> (or,
+                                depending on options,
+                                <filename>kernelz</filename>) symlink will link
+                                to the most recently built kernel image and
+                                a <filename>kernel.old</filename> (or
+                                <filename>kernelz.old</filename>) symlink will
+                                link to the second most recently built image,
+                                if one exists. Similar symlinks (both
+                                <filename>*</filename> and
+                                <filename>*.old</filename>) are managed for
+                                <filename>initramfs</filename> and
+                                <filename>System.map</filename>. The
+                                corresponding work products (i.e., the actual
+                                kernel and initamfs images, and
+                                <filename>System.map</filename>) are also
+                                managed accordingly.
+                            </para>
+                            <note>
+                                <para>
+                                    Specifying <option>--symlink</option> does
+                                    nothing unless <option>--install</option>
+                                    is also specified.
+                                </para>
+                            </note>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--callback=<replaceable class="parameter">command</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Run the specified arguments in the current
+                                environment after the kernel and modules have
+                                been compiled.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--static</option></term>
+                        <listitem>
+                            <para>Build a static (monolithic) kernel.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Kernel locations</title>
+                    <varlistentry>
+                        <term><option>--kerneldir=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                This specifies the location of the kernel
+                                sources. The default is
+                                <filename>/usr/src/linux</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--kernel-config=<replaceable class="parameter">file</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                This specifies a kernel configuration file to
+                                use for compilation. By default Genkernel uses
+                                the config from the previous build of the same
+                                kernel version or a default kernel config if
+                                there isn't a previous config.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--module-prefix=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Prefix to kernel module destination, modules
+                                will be installed in
+                                <filename><replaceable class="parameter">prefix</replaceable>/lib/modules</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Low-Level compilation options</title>
+                    <varlistentry>
+                        <term><option>--kernel-cc=<replaceable class="parameter">compiler</replaceable></option></term>
+                        <listitem>
+                            <para>Compiler to use for the kernel compilation (e.g. distcc).</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--kernel-as=<replaceable class="parameter">assembler</replaceable></option></term>
+                        <listitem>
+                            <para>Assembler to use for the kernel compilation.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--kernel-ld=<replaceable class="parameter">linker</replaceable></option></term>
+                        <listitem>
+                            <para>Linker to use for the kernel compilation.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--kernel-make=<replaceable class="parameter">makeprg</replaceable></option></term>
+                        <listitem>
+                            <para>GNU Make to use for the kernel compilation.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--makeopts=<replaceable class="parameter">makeopts</replaceable></option></term>
+                        <listitem>
+                            <para>GNU Make options such as <option>-j2</option>, etc.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>mountboot</option></term>
+                        <listitem>
+                            <para>
+                                Mount (or not) <varname>BOOTDIR</varname>
+                                automatically if mountable.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--bootdir=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Set the location of the boot-directory. The
+                                default is <filename>/boot</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Initialization</title>
+                    <varlistentry>
+                        <term><option>--bootloader=<replaceable class="parameter">grub</replaceable></option></term>
+                        <listitem>
+                            <para>Add new kernel to GRUB configuration.</para>
+                        </listitem>
+                    </varlistentry>
+                </variablelist>
+                <variablelist>
+                    <title>Dracut engine</title>
+                    <varlistentry>
+                        <term><option>--add-modules=<replaceable class="parameter">modules list</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Sources additional Dracut modules. See
+                                <filename>/usr/share/dracut/modules.d</filename>
+                                for possible values. Separate modules by space,
+                                e.g.:
+                                <programlisting>--add-modules="lvm crypt nfs"</programlisting>
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--auto</option></term>
+                        <listitem>
+                            <para>
+                                Rely on Dracut system check instead of
+                                specifying modules by hand.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--crypt</option></term>
+                        <listitem>
+                            <para>Include LUKS support.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--no-ramdisk-modules</option></term>
+                        <listitem>
+                            <para>Don't copy any modules to the ramdisk.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--dmraid</option></term>
+                        <listitem>
+                            <para>Include DMRAID support.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--dracut-dir=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Specifies directory of Dracut sources. If given
+                                Dracut is run in local mode (see description of
+                                <option>-l</option> in
+                                <citerefentry><refentrytitle>dracut</refentrytitle><manvolnum>8</manvolnum></citerefentry>).
+                                Program changes current directory to
+                                <filename>dir</filename>, so don't use relative
+                                paths then.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--evms</option></term>
+                        <listitem>
+                            <para>Include EVMS support.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--extra-options=<replaceable class="parameter">options</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Passes extra options to <command>dracut</command>. See
+                                <citerefentry><refentrytitle>dracut</refentrytitle><manvolnum>8</manvolnum></citerefentry>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--</option><optional>no-</optional><option>fbsplash</option></term>
+                        <listitem>
+                            <para>
+                                Enable (or disable) framebuffer splash
+                                (<package>splashutils</package>). To configure
+                                edit <filename>/etc/conf.d/splash</filename>.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--fbsplash=<replaceable class="parameter">theme</replaceable></option><optional>:<replaceable class="parameter">res</replaceable></optional></term>
+                        <listitem>
+                            <para>
+                                Enable framebuffer splash using
+                                <replaceable class="parameter">theme</replaceable>
+                                and optionally select splash theme resolutions
+                                to install.
+                                <replaceable class="parameter">res</replaceable>
+                                is comma-separated list of resolutions.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--fbsplash-no8bpp</option></term>
+                        <listitem>
+                            <para>
+                                Ignore 8 bpp splash images (can save a lot of
+                                space).
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--fbsplash-res=<replaceable class="parameter">res</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Specifies splash theme resolutions to install.
+                                <replaceable class="parameter">res</replaceable>
+                                is comma-separated list of resolutions.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--firmware</option></term>
+                        <listitem>
+                            <para>
+                                Enable copying of firmware into initramfs.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--firmware-dir=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Specifies directory to copy firmware from
+                                (defaults to
+                                <filename>/lib/firmware</filename>).
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--firmware-files=<replaceable class="parameter">files</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Specifies specific firmware files to copy. This
+                                overrides <option>--firmware-dir</option>. For
+                                multiple files, separate the filenames with
+                                a comma.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--generic</option></term>
+                        <listitem>
+                            <para>
+                                Build generic initramfs instead of default
+                                hostonly. Notice that generic is huge.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--initramfs-overlay=<replaceable class="parameter">dir</replaceable></option></term>
+                        <listitem>
+                            <para>
+                                Adds directory structure to include in the
+                                initramfs. It's available on 2.6 kernels only.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--iscsi</option></term>
+                        <listitem>
+                            <para>Include iSCSI support.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--lvm</option></term>
+                        <listitem>
+                            <para>Include LVM support</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--mdraid</option></term>
+                        <listitem>
+                            <para>Include RAID support via <package>mdadm</package>.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--multipath</option></term>
+                        <listitem>
+                            <para>Include Multipath support.</para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--plymouth</option></term>
+                        <listitem>
+                            <para>
+                                Enable
+                                <emphasis role="bold">experimental</emphasis>
+                                Plymouth splash. To configure edit
+                                <filename>/etc/plymouth/plymouthd.conf</filename>
+                                Requires <package>&gt;=plymouth-0.8.3</package>
+                                to be installed.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term><option>--unionfs</option></term>
+                        <listitem>
+                            <para>
+                                Include
+                                <emphasis role="bold">experimental</emphasis>
+                                support for UnionFS.
+                            </para>
+                        </listitem>
+                    </varlistentry>
+               </variablelist>
+               <variablelist>
+                   <title>Internals</title>
+                   <varlistentry>
+                       <term><option>--arch-override=<replaceable class="parameter">arch</replaceable></option></term>
+                       <listitem>
+                           <para>Force to arch instead of autodetect.</para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--cachedir=<replaceable class="parameter">dir</replaceable></option></term>
+                       <listitem>
+                           <para>Override the default cache location.</para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--tempdir=<replaceable class="parameter">dir</replaceable></option></term>
+                       <listitem>
+                           <para>Location of Genkernel's temporary directory.</para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--postclear</option></term>
+                       <listitem>
+                           <para>Clear all tmp files and caches after Genkernel has run.</para>
+                       </listitem>
+                   </varlistentry>
+               </variablelist>
+               <variablelist>
+                   <title>Output settings</title>
+                   <varlistentry>
+                       <term><option>--kernname=<replaceable class="parameter">name</replaceable></option></term>
+                       <listitem>
+                           <para>
+                               Tag the kernel and ramdisk with a
+                               <replaceable class="parameter">name</replaceable>.
+                               If not defined the option defaults to
+                               <computeroutput>genkernel</computeroutput>.
+                           </para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--minkernpackage=<replaceable class="parameter">tbz2</replaceable></option></term>
+                       <listitem>
+                           <para>
+                               File to output a .tar.bz2'd kernel and ramdisk.
+                               No modules outside of the ramdisk will be
+                               included.
+                           </para>
+                       </listitem>
+                   </varlistentry>
+
+                   <varlistentry>
+                       <term><option>--modulespackage=tbz2</option></term>
+                       <listitem>
+                           <para>
+                               File to output a .tar.bz2'd modules after the
+                               callbacks have run.
+                           </para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--kerncache=<replaceable class="parameter">tbz2</replaceable></option></term>
+                       <listitem>
+                           <para>
+                               File to output a .tar.bz2'd kernel contents of
+                               <filename>/lib/modules/</filename> and the
+                               kernel config.
+                           </para>
+                           <note>
+                               <para>
+                                   This is created before the callbacks are run!
+                               </para>
+                           </note>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--no-kernel-sources</option></term>
+                       <listitem>
+                           <para>
+                               This option is only valid if kerncache is
+                               defined. If there is a valid kerncache no checks
+                               will be made against a kernel source tree.
+                           </para>
+                       </listitem>
+                   </varlistentry>
+                   <varlistentry>
+                       <term><option>--integrated-initramfs</option></term>
+                       <listitem>
+                           <para>
+                               Build the generated initramfs into the kernel
+                               instead of keeping it as a separate file.</para>
+                       </listitem>
+                   </varlistentry>
+               </variablelist>
+            </refsect2>
+        </refsect1>
+        <refsect1>
+            <title>Ramdisk options</title>
+            <para>
+                For ramdisk options see
+                <citerefentry><refentrytitle>dracut.kernel</refentrytitle><manvolnum>7</manvolnum></citerefentry>.
+            </para>
+        </refsect1>
+        <refsect1>
+            <title>Reporting bugs</title>
+            <para>
+                If you believe you have found a bug in the Genkernel scripts,
+                then please file a bug on the Gentoo Linux Bugzilla:
+                <uri type="website">http://bugs.gentoo.org</uri> assigning your
+                bug to <email>genkernel@gentoo.org</email>. We cannot assist
+                you with kernel compilation failures unless they are caused by
+                a Genkernel bug.
+            </para>
+            <para>
+                Kernel issues for Gentoo-supported kernels, including
+                compilation failures should go to
+                <uri type="website">http://bugs.gentoo.org</uri> and should be
+                assigned to <email>kernel@gentoo.org</email>. Please check if
+                an existing bug documents the same issue before opening a new
+                bug. Issues for kernel sources not supported by Gentoo should
+                go to their relevant authors.
+            </para>
+        </refsect1>
+        <refsect1>
+            <title>Files</title>
+            <variablelist>
+                <varlistentry>
+                    <term><filename>/etc/genkernel.conf</filename></term>
+                    <listitem>
+                        <para>Genkernel configuration file</para>
+                    </listitem>
+                </varlistentry>
+            </variablelist>
+        </refsect1>
+        <refsect1>
+            <title>See also</title>
+            <para>
+                <citerefentry>
+                    <refentrytitle>dracut</refentrytitle>
+                    <manvolnum>8</manvolnum>
+                </citerefentry>
+                <citerefentry>
+                    <refentrytitle>dracut.kernel</refentrytitle>
+                    <manvolnum>7</manvolnum>
+                </citerefentry>
+            </para>
+        </refsect1>
+    </refentry>
+</reference>
