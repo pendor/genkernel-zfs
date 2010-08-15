@@ -40,7 +40,7 @@ longusage() {
   echo "	--no-symlink		Do not manage symlinks"
   echo "	--callback=<...>	Run the specified arguments after the"
   echo "				kernel and modules have been compiled"
-  echo "	--static		Build a static (monolithic kernel)."
+  echo "	--static		Build a static (monolithic) kernel."
   echo "  Kernel settings"
   echo "	--kerneldir=<dir>	Location of the kernel sources"
   echo "	--kernel-config=<file>	Kernel configuration file to use for compilation"
