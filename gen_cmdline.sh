@@ -410,7 +410,7 @@ parse_cmdline() {
 				print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
 			}
 			;;
-		--fbsplash-res=*|--gensplash=*|--splash=*)
+		--fbsplash-res=*|--gensplash-res=*|--splash-res=*)
 			GENSPLASH_RES=`parse_opt "$*"`
 			print_info 2 "GENSPLASH_RES: ${GENSPLASH_RES}"
 			;;
