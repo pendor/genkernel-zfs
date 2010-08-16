@@ -37,7 +37,9 @@ create_initramfs() {
 		opts+=\ -H
 	fi
 
-	if isTrue "${NORAMDISKMODULES}"
+	[[ ${INSTALL_MOD_PATH} ]] && opts+=\ -k\ "${INSTALL_MOD_PATH}"
+
+	if isTrue "${NORAMDISKMODULES}" || isTrue "${BUILD_STATIC}"
 	then
 		print_info 1 '           >> Not copying kernel modules and firmware...'
 		opts+=\ --ignore-kernel-modules
