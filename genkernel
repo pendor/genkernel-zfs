@@ -2,7 +2,7 @@
 # $Id$
 
 PATH="${PATH}:/sbin:/usr/sbin"
-GK_V='3.4.10.907'
+GK_V='3.4.13'
 
 # Set the default for TMPDIR.  May be modified by genkernel.conf or the
 # --tempdir command line option.
@@ -61,21 +61,21 @@ trap_cleanup(){
 }
 
 cleanup(){
- 	if [ -n "$TEMP" -a -d "$TEMP" ]; then
-		rm -rf "$TEMP"
- 	fi
+    if [ -n "$TEMP" -a -d "$TEMP" ]; then
+	rm -rf "$TEMP"
+    fi
 
-	if isTrue ${POSTCLEAR}
-	then
-		echo
-		print_info 1 'RUNNING FINAL CACHE/TMP CLEANUP'
-		print_info 1 "CACHE_DIR: ${CACHE_DIR}"
-		CLEAR_CACHE_DIR='yes'
-		setup_cache_dir
-		echo
-		print_info 1 "TMPDIR: ${TMPDIR}"
-		clear_tmpdir
-	fi
+    if isTrue ${POSTCLEAR}
+    then
+	    echo
+	    print_info 1 'RUNNING FINAL CACHE/TMP CLEANUP'
+	    print_info 1 "CACHE_DIR: ${CACHE_DIR}"
+	    CLEAR_CACHE_DIR='yes'
+	    setup_cache_dir
+	    echo
+	    print_info 1 "TMPDIR: ${TMPDIR}"
+	    clear_tmpdir
+	    fi
 }
 
 trap trap_cleanup SIGHUP SIGQUIT SIGINT SIGTERM SIGKILL
@@ -92,7 +92,7 @@ do
 done
 
 # Check if no action is specified...
-if [ "${BUILD_KERNEL}" -eq '0' -a "${BUILD_RAMDISK}" -eq '0' ]
+if [ "${BUILD_KERNEL}" = '0' -a "${BUILD_RAMDISK}" = '0' ]
 then
 	usage
 	exit 1
@@ -200,10 +200,10 @@ fi
 KERNCACHE_IS_VALID=0
 if [ "${KERNCACHE}" != "" ] 
 then
-	gen_kerncache_is_valid
+    gen_kerncache_is_valid
 fi
 
-if [ ${BUILD_KERNEL} -eq '1' -a "${KERNCACHE_IS_VALID}" == "0" ]
+if [ ${BUILD_KERNEL} = '1' -a "${KERNCACHE_IS_VALID}" = '0' ]
 then
 	# Configure kernel
 	config_kernel
@@ -220,12 +220,12 @@ then
 	compile_kernel
 
 	# Compile modules
-	if [ ${BUILD_MODULES} -eq '1' -a ${BUILD_STATIC} -eq '0' ]
+	if [ "${BUILD_MODULES}" = '1' -a "${BUILD_STATIC}" = '0' ]
 	then
 		compile_modules
 	fi
 
-	if [ ${SAVE_CONFIG} -eq '1' ]
+	if [ "${SAVE_CONFIG}" = '1' ]
 	then
 		print_info 1 "Copying config for successful build to /etc/kernels/kernel-config-${ARCH}-${KV}"
 		[ ! -e '/etc/kernels' ] && mkdir -p /etc/kernels
@@ -243,7 +243,7 @@ fi
 
 if [ "${KERNCACHE}" != "" -a "${KERNCACHE_IS_VALID}" != "0" ] 
 then
-	[ ${BUILD_STATIC} -eq '0' ] && gen_kerncache_extract_modules
+	[ "${BUILD_STATIC}" = '0' ] && gen_kerncache_extract_modules
 	gen_kerncache_extract_config
 fi
 
@@ -257,13 +257,13 @@ then
 	CALLBACK_COUNT=0
 
 	trap "CALLBACK_ESCAPE=1" TERM KILL INT QUIT ABRT
-	while [[ ${CALLBACK_ESCAPE} -eq '0' && ${CALLBACK_COUNT} -lt 5 ]]
+	while [[ "${CALLBACK_ESCAPE}" = '0' && ${CALLBACK_COUNT} -lt 5 ]]
 	do
 		sleep 1; echo -n '.';
 		let CALLBACK_COUNT=${CALLBACK_COUNT}+1
 	done
 
-	if [ "${CALLBACK_ESCAPE}" -eq '0' ]
+	if [ "${CALLBACK_ESCAPE}" = '0' ]
 	then
 		echo
 		echo
@@ -271,7 +271,7 @@ then
 		CMD_STATUS="${PIPESTATUS[0]}"
 		echo
 		print_info 1 "<<< Callback exit status: ${CMD_STATUS}"
-		[ "${CMD_STATUS}" -ne 0 ] && gen_die '--callback failed!'
+		[ "${CMD_STATUS}" != '0' ] && gen_die '--callback failed!'
 	else
 		echo
 		print_info 1 ">>> Callback cancelled..."
@@ -280,7 +280,7 @@ then
 	print_info 1 "" 1 0
 fi
 
-if [ "${BUILD_RAMDISK}" -eq '1' ]
+if [ "${BUILD_RAMDISK}" = '1' ]
 then
 	# Compile initramfs
 	create_initramfs
@@ -288,7 +288,7 @@ else
 	print_info 1 'initrd: Not building since only the kernel was requested...'
 fi
 
-if isTrue "${INTEGRATED_INITRAMFS}" #|| [ ${BUILD_KERNEL} -eq '1' -a "${KERNCACHE_IS_VALID}" == "0" ]
+if isTrue "${INTEGRATED_INITRAMFS}" #|| [ "${BUILD_KERNEL}" = '1' -a "${KERNCACHE_IS_VALID}" == "0" ]
 then
 	# We build the kernel a second time to include the initramfs
 	compile_kernel
@@ -301,7 +301,7 @@ fi
 # Clean up...
 [ -n "${CTEMP}" ] && rm -rf "${TEMP}"
 
-if [ "${BUILD_KERNEL}" -eq '1' ]
+if [ "${BUILD_KERNEL}" = '1' ]
 then
 	if ! isTrue "${CMD_NOINSTALL}"
 	then
@@ -321,7 +321,7 @@ if [ "${BUILD_KERNEL}" -eq '1' ] || [ "${BUILD_RAMDISK}" -eq '1' ]; then
 	print_info 1 '    one specified in /etc/fstab'
 fi
 
-if [ "${BUILD_RAMDISK}" -eq '1' ]
+if [ "${BUILD_RAMDISK}" = '1' ]
 then
 	echo
 	print_info 1 'WARNING... WARNING... WARNING...'

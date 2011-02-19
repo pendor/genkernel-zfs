@@ -1,9 +1,178 @@
 # ChangeLog for genkernel
 # Copyright: 
 # - 2003-2008 Gentoo Foundation
-# - 2008-2009 Various authors (see AUTHORS)
+# - 2008-2011 Various authors (see AUTHORS)
 # Distributed under the GPL v2
 # $Id$
+
+  10 Feb 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.13
+
+  09 Feb 2011; Sebastian Pipping <sping@gentoo.org> genkernel.conf:
+  Add SPLASH and SPLASH_THEME to genkernel.conf (bug #268468)
+
+  Special thanks:
+  - PhobosK
+
+  08 Feb 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Add iBFT support for iSCSI (bug #314575)
+
+  Special thanks:
+  - Stefan Behte
+
+  7 Feb 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Use devtmpfs/tmpfs for /dev (bug #353024)
+  Rescue devtmpfs /dev over to chroot (bug #353024, bug #344407)
+
+  Special thanks:
+  - Peter Hjalmarsson
+
+  31 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.6
+
+  31 Jan 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Speed up LVM activation (bug #351047)
+
+  Special thanks:
+  - Peter Hjalmarsson
+
+  30 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.5
+
+  30 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_initramfs.sh:
+  Give blkid of e2fsprogs precedence over busybox re-write by putting it into
+  /sbin, not /bin (bug #352746)
+
+  30 Jan 2011; Sebastian Pipping <sping@gentoo.org> arch/x86_64/kernel-config:
+  Enable CONFIG_USB_SUSPEND and CONFIG_PM_RUNTIME for x86_64 (bug #351376)
+
+  30 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.4
+
+  30 Jan 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Enhance console handling on netboot linuxrc (bug #353084)
+  Enable shadow on netboot's busybox config (bug #353085)
+
+  Special thanks:
+  - Raúl Porcel
+
+  29 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.3
+
+  29 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_compile.sh:
+  No longer require device mapper bincache for compiling lvm (bug #353026)
+
+  Special thanks:
+  - Peter Hjalmarsson
+
+  27 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.2
+
+  27 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_determineargs.sh:
+  Revert kernel release detection fix (regression) (bug #352787)
+
+  23 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12.1
+
+  23 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_initramfs.sh:
+  Fix copying of mdadm/mdmon to the initramfs (bug #352496). Thanks to Malcolm
+  Lashley for reporting.
+
+  23 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.12
+
+  22 Jan 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Enable CONFIG_USB_SUSPEND for x86/amd64 (bug #351376)
+  Replace "${MAKEOPTS/-j?/j1}" by "${MAKEOPTS} -j1" (bug #277607)
+
+  21 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_determineargs.sh:
+  Do not query generated files (like include/config/kernel.release) for kernel
+  version, as they may be out of sync (bug #263927)
+
+  20 Jan 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Add proper mdadm support (bug #282100)
+
+  Special thanks:
+  - Craig Andrews (Testing)
+  - Laurent Pinchart (mdmon/IMSM support)
+  - Matthias Dahl (Initial patch)
+  - Peter Hjalmarsson (Testing)
+
+  20 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.11.1
+
+  20 Jan 2011; Sebastian Pipping <sping@gentoo.org> gen_configkernel.sh:
+  Move application of kernel config after "make mrproper" as that deletes
+  .config (whereas "make clean" does not) (bug #351906)
+
+  Special thanks:
+  - Peter Hjalmarsson
+
+  20 Jan 2011; Sebastian Pipping <sping@gentoo.org>
+  patches/busybox/1.18.1/1.18.1-mdstart.diff:
+  busybox 1.18.1: Return of mdstart as an applet (regression) (bug #351909)
+
+  16 Jan 2011; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.11
+
+  16 Jan 2011; Sebastian Pipping <sping@gentoo.org> defaults/initrd.scripts:
+  Do not sleep after vgscan (bug #351047)
+
+  16 Jan 2011; Sebastian Pipping <sping@gentoo.org> ChangeLog:
+  Changes:
+  - Fix compilation of LVM 2.02.74 (and 2.02.28) (bug #255196, bug #267383)
+  - Add minimal btrfs support (bug #303529)
+  - Add support for UUID to crypt_root (bug #315467)
+  - Run "make firmware_install" if CONFIG_FIRMWARE_IN_KERNEL != y (bug #244651)
+  - Port busybox patches from 1.7.4 to 1.18.1 (bug #331971)
+  - Handle missing kernel .config better (bug #271528)
+  - Improve slowusb handling (bug #323317)
+  - Add GnuPG 1.x support (bug #217959)
+  - Check return codes of cpio (bug #246370)
+  - Update e2fsprogs/blkid to 1.41.14 (bug #291822)
+  - Create /bin/vg* symlinks when called as /linuxrc, too (bug #307855)
+  - Pick first device when several devices are matching real_root (bug #303531)
+  - Fix warning "cannot remove `/var/cache/genkernel/src'" (bug #347213)
+  - Allow configuring the list of busybox applets (bug #326593)
+  - Fix arithmetic bug in defaults/initrd.scripts (bug #339789)
+
+  Special thanks:
+  - Amadeusz Zolnowski (LVM update)
+  - Christian Giessner (UUID crypt_root)
+  - dacook (GnuPG 1.x support)
+  - Denis Kaganovich (Busybox patch porting)
+  - devsk (Multi-device patch)
+  - Fabio Erculiani (Slowusb fixes)
+  - Kai Dietrich (Symlink analysis)
+  - Kolbjørn Barmen (Arithmetic fix)
+
+  13 Dec 2010; Sebastian Pipping <sping@gentoo.org> genkernel:
+  Bump version to 3.4.10.908
+
+  13 Dec 2010; <sping@gentoo.org> doc/genkernel.8.txt, gen_cmdline.sh:
+  docs: Document --genzimage
+
+  13 Dec 2010; <sping@gentoo.org> gen_cmdline.sh:
+  Fix a reference to --nomenuconfig into --no-menuconfig
+
+  13 Dec 2010; <sping@gentoo.org> doc/genkernel.8.txt:
+  docs: Update man page from output of --help
+
+  13 Dec 2010; <sping@gentoo.org> doc/genkernel.8.txt:
+  docs: Document keymap= and dokeymap (bug #346017)
+
+  6 Dec 2010; <sping@gentoo.org> genkernel.conf:
+  .conf: Document LUKS variable (bug #346015)
+
+  6 Dec 2010; <sping@gentoo.org> doc/genkernel.8.txt:
+  docs: Mention both "initramfs" and "ramdisk" as available actions
+  (bug #251702)
+
+  6 Dec 2010; <sping@gentoo.org> genkernel.8:
+  man page: Propagate rename of --no-initrdmodules to --no-ramdisk-modules
+
+  29 Nov 2010; <sping@gentoo.org> ChangeLog:
+  Add patch allowing compilation of busybox 1.7.4 with make 3.82 (bug #341943)
 
   20 Feb 2010; Andrew Gaffney <agaffney@gentoo.org> defaults/initrd.scripts:
   Apply patches from Gentoo bug #268468
@@ -244,6 +413,7 @@
 
   23 Dec 2008; Andrew Gaffney <agaffney@gentoo.org> gen_cmdline.sh:
   Allow old 'initramfs' option instead of 'ramdisk' for compatability
+  (bug #251702)
 
   17 Dec 2008; Andrew Gaffney <agaffney@gentoo.org> defaults/linuxrc:
   Remove the use of 'env -i' when calling switch_root due to Gentoo bug

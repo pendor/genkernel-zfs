@@ -3,12 +3,14 @@
 
 longusage() {
   echo "Gentoo Linux Genkernel ${GK_V}"
+  echo
   echo "Usage: "
   echo "  genkernel [options] action"
   echo
   echo "Available Actions: "
   echo "  all				Build all steps"
   echo "  bzImage			Build only the kernel"
+  echo "  initramfs			Build only the ramdisk/initramfs"
   echo "  kernel			Build only the kernel and modules"
   echo "  ramdisk			Build only the ramdisk/initramfs"
   echo
@@ -143,6 +145,7 @@ longusage() {
 
 usage() {
   echo "Gentoo Linux Genkernel ${GK_V}"
+  echo
   echo "Usage: "
   echo "	genkernel [options] all"
   echo
@@ -213,7 +216,7 @@ parse_cmdline() {
 			if [[ TERM_LINES -lt 19 || TERM_COLUMNS -lt 80 ]]
 			then
 				echo "Error: You need a terminal with at least 80 columns"
-				echo "		 and 19 lines for --menuconfig; try --nomenuconfig..."
+				echo "		 and 19 lines for --menuconfig; try --no-menuconfig..."
 				exit 1
 			fi
 			CMD_MENUCONFIG=1
@@ -282,11 +285,11 @@ parse_cmdline() {
 			TEMP=${TMPDIR}/$RANDOM.$RANDOM.$RANDOM.$$
 			print_info 2 "TMPDIR: ${TMPDIR}"
 			print_info 2 "TEMP: ${TEMP}"
-			;;
+			;; 
 		--postclear)
 			CMD_POSTCLEAR=1
 			print_info 2 "CMD_POSTCLEAR: ${CMD_POSTCLEAR}"
-			;;
+			;; 
 		--arch-override=*)
 			CMD_ARCHOVERRIDE=`parse_opt "$*"`
 			print_info 2 "CMD_ARCHOVERRIDE: ${CMD_ARCHOVERRIDE}"

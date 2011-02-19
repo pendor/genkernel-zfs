@@ -14,7 +14,9 @@ Phases:
 Rolling a release:
 - Bump the version in the main genkernel file.
 - echangelog commit the bump
-- git tag -a -m "Tag release $PV" v${PV}
-- git archive --prefix genkernel-$PV/ --format tar -o /tmp/genkernel-${PV}.tar v${PV}
-- bzip2 -9v /tmp/genkernel-${PV}.tar
-- upload /tmp/genkernel-${PV}.tar.bz2 to the hosting.
+- git tag -a -m "Tag release v${PV}" v${PV}
+- git push ${REMOTE} master --tags
+- make dist
+- upload genkernel-${PV}.tar.bz2 to the hosting:
+    scp genkernel-${PV}.tar.bz2 ${USER}@dev.gentoo.org:/space/distfiles-local/
+- check open bugs with keyword "InSVN" for closability

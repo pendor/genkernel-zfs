@@ -29,7 +29,8 @@ compile_kernel_args() {
 	echo -n "${ARGS}"
 }
 
-export_kernel_args() {
+export_kernel_args()
+{
 	if [ "${KERNEL_CC}" != '' ]
 	then
 		export CC="${KERNEL_CC}"
@@ -48,7 +49,8 @@ export_kernel_args() {
 	fi
 }
 
-unset_kernel_args() {
+unset_kernel_args()
+{
 	if [ "${KERNEL_CC}" != '' ]
 	then
 		unset CC
@@ -66,8 +68,8 @@ unset_kernel_args() {
 		unset CROSS_COMPILE
 	fi
 }
-
-save_args() {
+save_args()
+{
 	if [ "${ARCH}" != '' ]
 	then
 		export ORIG_ARCH="${ARCH}"
@@ -89,8 +91,8 @@ save_args() {
 		export ORIG_CROSS_COMPILE="${CROSS_COMPILE}"
 	fi
 }
-
-reset_args() {
+reset_args()
+{
 	if [ "${ORIG_ARCH}" != '' ]
 	then
 		export ARCH="${ORIG_ARCH}"
@@ -127,6 +129,7 @@ apply_patches() {
 		print_info 1 "${util}: >> Applying patches..."
 		for i in ${GK_SHARE}/patches/${util}/${version}/*{diff,patch}
 		do
+			[ -f "${i}" ] || continue
 			patch_success=0
 			for j in `seq 0 5`
 			do
@@ -137,8 +140,10 @@ apply_patches() {
 					break
 				fi
 			done
-			if [ ${patch_success} != 1 ]
+			if [ ${patch_success} -eq 1 ]
 			then
+				print_info 1 "          - `basename ${i}`"
+			else
 				gen_die "could not apply patch ${i} for ${util}-${version}"
 			fi
 		done
@@ -173,8 +178,8 @@ compile_generic() {
 	# ARGS='CC="ccache gcc"'
 	if [ "${argstype}" == 'runtask' ]
 	then
-		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS/-j?/j1} ${ARGS} ${target} $*" 1 0 1
-		eval ${MAKE} -s ${MAKEOPTS/-j?/-j1} "${ARGS}" ${target} $*
+		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} -j1 ${ARGS} ${target} $*" 1 0 1
+		eval ${MAKE} -s ${MAKEOPTS} -j1 "${ARGS}" ${target} $*
 		RET=$?
 	elif [ "${LOGLEVEL}" -gt "1" ]
 	then
@@ -188,7 +193,7 @@ compile_generic() {
 		eval ${MAKE} ${MAKEOPTS} ${ARGS} ${target} $* >> ${LOGFILE} 2>&1
 		RET=$?
 	fi
-	[ "${RET}" -ne '0' ] &&
+	[ ${RET} -ne 0 ] &&
 		gen_die "Failed to compile the \"${target}\" target..."
 
 	unset MAKE
@@ -222,6 +227,15 @@ compile_kernel() {
 	then
 		print_info 1 "        >> Starting supplimental compile of ${KV}: ${KERNEL_MAKE_DIRECTIVE_2}..."
 		compile_generic "${KERNEL_MAKE_DIRECTIVE_2}" kernel
+	fi
+
+	local firmware_in_kernel_line=`fgrep CONFIG_FIRMWARE_IN_KERNEL "${KERNEL_DIR}"/.config`
+	if [ -n "${firmware_in_kernel_line}" -a "${firmware_in_kernel_line}" != CONFIG_FIRMWARE_IN_KERNEL=y ]
+	then
+		print_info 1 "        >> Installing firmware ('make firmware_install') due to CONFIG_FIRMWARE_IN_KERNEL != y..."
+		compile_generic "firmware_install" kernel
+	else
+		print_info 1 "        >> Not installing firmware as it's included in the kernel already (CONFIG_FIRMWARE_IN_KERNEL=y)..."
 	fi
 
 	local tmp_kernel_binary=$(find_kernel_binary ${KERNEL_BINARY})
