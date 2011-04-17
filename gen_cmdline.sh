@@ -59,6 +59,7 @@ longusage() {
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
   echo "	--bootloader=grub	Add new kernel to GRUB configuration"
+  echo "	--genzimage		Make and install kernelz image (PowerPC)"
   echo "  Dracut engine"
   echo "	--add-modules=<modules list>"
   echo "				Additional Dracut modules;"
