@@ -42,7 +42,7 @@ longusage() {
   echo "	--no-symlink		Do not manage symlinks"
   echo "	--callback=<...>	Run the specified arguments after the"
   echo "				kernel and modules have been compiled"
-  echo "	--static		Build a static (monolithic) kernel."
+  echo "	--static		Build a static (monolithic kernel)."
   echo "  Kernel settings"
   echo "	--kerneldir=<dir>	Location of the kernel sources"
   echo "	--kernel-config=<file>	Kernel configuration file to use for compilation"
@@ -55,7 +55,7 @@ longusage() {
   echo "	--kernel-make=<makeprg> GNU Make to use for kernel"
   echo "	--makeopts=<makeopts>	Make options such as -j2, etc..."
   echo "	--mountboot		Mount BOOTDIR automatically if mountable"
-  echo "	--no-mountboot		Don't mount BOOTDIR automatically"
+  echo "	--no-mountboot		Don't mount BOOTDIR automatically"  
   echo "	--bootdir=<dir>		Set the location of the boot-directory, default is /boot"
   echo "  Initialization"
   echo "	--bootloader=grub	Add new kernel to GRUB configuration"
@@ -160,8 +160,6 @@ usage() {
 }
 
 parse_cmdline() {
-	local tmp
-
 	case "$*" in
 		--kernel-cc=*)
 			CMD_KERNEL_CC=`parse_opt "$*"`
