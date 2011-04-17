@@ -2,7 +2,7 @@
 # $Id$
 
 BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
-BASIC_MODULES+=\ udev-rules\ uswsusp\ base
+BASIC_MODULES+=\ udev-rules\ base
 MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gensplash
 
 dracut_modules() {
@@ -26,7 +26,7 @@ dracut_modules() {
 }
 
 create_initramfs() {
-	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f -v' add_files=()
+	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f -L=3 -M' add_files=()
 
 	print_info 1 'initramfs: >> Initializing Dracut...'
 
@@ -42,7 +42,7 @@ create_initramfs() {
 	if isTrue "${NORAMDISKMODULES}" || isTrue "${BUILD_STATIC}"
 	then
 		print_info 1 '           >> Not copying kernel modules and firmware...'
-		opts+=\ --ignore-kernel-modules
+		opts+=\ --no-kernel
 	else
 		isTrue "${FIRMWARE}" && opts+=" --fwdir ${FIRMWARE_DIR}"
 		[[ ${FIRMWARE_FILES} ]] && add_files+=(${FIRMWARE_FILES})
@@ -54,17 +54,24 @@ create_initramfs() {
 	opts+=" ${EXTRA_OPTIONS}"
 	opts+=" $(dracut_modules)"
 
-	export DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}
-	export DRACUT_GENSPLASH_RES=${GENSPLASH_RES}
-	print_info 1 "           >> DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}"
-	print_info 1 "           >> DRACUT_GENSPLASH_RES=${GENSPLASH_RES}"
+	if isTrue "${GENSPLASH}"
+	then
+		export DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}
+		export DRACUT_GENSPLASH_RES=${GENSPLASH_RES}
+		print_info 1 "           >> DRACUT_GENSPLASH_THEME=${GENSPLASH_THEME}"
+		print_info 1 "           >> DRACUT_GENSPLASH_RES=${GENSPLASH_RES}"
+	fi
 	print_info 1 "           >> dracut ${opts} '${tmprd}' '${KV}'"
 	if [[ ${DRACUT_DIR} ]]; then
 		cd "${DRACUT_DIR}"
 		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\'
 		cd - >/dev/null
 	else
-		eval dracut ${opts} \'${tmprd}\' \'${KV}\'
+		eval dracut ${opts} \'${tmprd}\' \'${KV}\' | while read module; do
+			[[ \ $MODULES\  =~ \ $module\  ]] && \
+				module="${BOLD}${module}${NORMAL}"
+			print_info 1 "              >> Including module: $module"
+		done
 	fi
 
 	if isTrue "${INTEGRATED_INITRAMFS}"
