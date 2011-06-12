@@ -41,6 +41,7 @@ source ${GK_SHARE}/gen_arch.sh || gen_die "Could not read ${GK_SHARE}/gen_arch.s
 source ${GK_SHARE}/gen_determineargs.sh || gen_die "Could not read ${GK_SHARE}/gen_determineargs.sh"
 source ${GK_SHARE}/gen_compile.sh || gen_die "Could not read ${GK_SHARE}/gen_compile.sh"
 source ${GK_SHARE}/gen_configkernel.sh || gen_die "Could not read ${GK_SHARE}/gen_configkernel.sh"
+source ${GK_SHARE}/gen_dylibs.sh || gen_die "Could not read ${GK_SHARE}/gen_dylibs.sh"
 source ${GK_SHARE}/gen_initramfs.sh || gen_die "Could not read ${GK_SHARE}/gen_initramfs.sh"
 source ${GK_SHARE}/gen_moddeps.sh || gen_die "Could not read ${GK_SHARE}/gen_moddeps.sh"
 source ${GK_SHARE}/gen_package.sh || gen_die "Could not read ${GK_SHARE}/gen_package.sh"
@@ -347,6 +348,7 @@ then
 	print_info 1 'WARNING... WARNING... WARNING...'
 	print_info 1 'Additional kernel cmdline arguments that *may* be required to boot properly...'
 	[ "${SPLASH}" = '1' ] && print_info 1 "add \"vga=791 splash=silent,theme:${SPLASH_THEME} console=tty1 quiet\" if you use a splash framebuffer ]"
+	[ "${ZFS}" = '1' ] && print_info 1 'add "dozfs" for ZFS support'
 	[ "${LVM}" = '1' ] && print_info 1 'add "dolvm" for lvm support'
 	[ "${EVMS}" = '1' ] && print_info 1 'add "doevms" for evms support'
 	[ "${DMRAID}" = '1' ] && print_info 1 'add "dodmraid" for dmraid support'

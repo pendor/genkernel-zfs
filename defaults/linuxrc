@@ -78,6 +78,9 @@ do
 			ISOBOOT=`parse_opt "${x}"`
 		;;
 		# Start Volume manager options 
+		dozfs)
+			USE_ZFS=1
+		;;
 		dolvm)
 			USE_LVM_NORMAL=1
 		;;
@@ -457,6 +460,53 @@ do
 				fi
 				;;
 		esac
+		
+		if [ "${USE_ZFS}" = '1' ]
+		then
+		  case "${REAL_ROOT}" in
+			  ZFS\=*|zfs:*)
+			    # real_root is explicit ZFS root.  Try to import the pool.
+					zfsbootfs="${REAL_ROOT#zfs:}"
+					zfsbootfs="ZFS=${REAL_ROOT#ZFS=}"
+					# Clear REAL_ROOT in case import fails -- Only keep it if it's importable.
+					REAL_ROOT=""
+					pool=`zfs_get_rpool ${zfsbootfs}`
+					/sbin/zpool list -H $pool > /dev/null
+					if [ "$?" -eq "1" ]
+					then
+					  # pool wasn't imported from zcache, so try it manually.
+					  /sbin/zpool import -f -N $pool || { bad_msg "ZFS: Unable to import root pool '${pool}'." ; continue ; }
+				  fi    			
+    			REAL_ROOT="${zfsbootfs}"
+    			good_msg "ZFS: Using ${zfsbootfs} as real_root."
+			  ;;
+			  "")
+  			  # No real_root set, so try to find it from bootfs attribute.
+    			good_msg "ZFS: Attempting to detect real_root from importable ZFS pools."
+    			/sbin/zpool import -f -N -a
+    			zfsbootfs=`/sbin/zpool list -H -o bootfs | /bin/grep -v ^-$ -m 1`
+  			
+    			if [ "x$zfsbootfs" = 'x' ]
+    			then
+    			  pool=""
+    				bad_msg "ZFS: No bootfs attribute found in importable pools."
+    			else
+    				REAL_ROOT="ZFS=$zfsbootfs"
+    				pool="`zfs_get_rpool ${REAL_ROOT}`"
+    				good_msg "ZFS: Using ${zfsbootfs} as real_root."
+    			fi
+
+    			# Export everything but our root again.
+    			/sbin/zpool list -H | while read fs rest
+    		  do 
+    			  if [ "$pool" != "$fs" ]
+    			  then
+    			    /sbin/zpool export "$fs"
+    			  fi
+    			done
+				;;
+		  esac
+		fi
 				
 		if [ "${REAL_ROOT}" = '' ]
 		then
@@ -465,7 +515,7 @@ do
 			got_good_root=0
 
 		# Check for a block device or /dev/nfs
-		elif [ -b "${REAL_ROOT}" ] || [ "${REAL_ROOT}" = "/dev/nfs" ]
+		elif [ -b "${REAL_ROOT}" ] || [ "${REAL_ROOT}" = "/dev/nfs" ] || [ "${REAL_ROOT:0:4}" = 'ZFS=' ]
 		then
 			got_good_root=1
 
@@ -479,7 +529,7 @@ do
 
 	if [ "${CDROOT}" = 1 -a "${got_good_root}" = '1' -a "${REAL_ROOT}" != "/dev/nfs" ]
 	then
-		# CD already mounted; no further checks necessary
+		# CD or ZFS already mounted; no further checks necessary
 		break
 	elif [ "${LOOPTYPE}" = "sgimips" ]
 	then
@@ -492,6 +542,9 @@ do
 		# Try to mount the device as ${NEW_ROOT}
 		if [ "${REAL_ROOT}" = '/dev/nfs' ]; then
 			findnfsmount
+		elif [ "${REAL_ROOT:0:4}" = 'ZFS=' ]
+		then
+		  mount -t zfs `zfs_get_rootfs ${REAL_ROOT}` ${NEW_ROOT}
 		else
 			# mount ro so fsck doesn't barf later
 			if [ "${REAL_ROOTFLAGS}" = '' ]; then

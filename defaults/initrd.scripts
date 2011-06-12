@@ -609,6 +609,17 @@ chooseKeymap() {
 	fi
 }
 
+# Extract just the pool name from real_root formatted string
+zfs_get_rpool() {
+  zfsroot="${1#ZFS=}"
+	echo "${zfsroot%%/*}"
+}
+
+# Extract just the pool/fs name from real_root formatted string
+zfs_get_rootfs() {
+  echo "${1#ZFS=}"
+}
+
 startVolumes() {
 	#good_msg 'Checking if volumes need to be started...'
 
@@ -638,7 +649,7 @@ startVolumes() {
 			fi
 		fi
 	fi
-
+	
 	if [ "${USE_LVM_NORMAL}" = '1' ]
 	then
 		if [ -e '/bin/lvm' ]

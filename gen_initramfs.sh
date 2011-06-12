@@ -234,6 +234,34 @@ append_iscsi(){
 	rm -rf "${TEMP}/initramfs-iscsi-temp" > /dev/null
 }
 
+append_zfs(){
+	if [ -d "${TEMP}/initramfs-zfs-temp" ]
+	then
+		rm -r "${TEMP}/initramfs-zfs-temp/"
+	fi
+	
+	print_info 1 '          ZFS: Adding support using local binaries w/ dylibs'
+	
+	cd ${TEMP}
+	mkdir -p "${TEMP}/initramfs-zfs-temp/bin/"
+	mkdir -p "${TEMP}/initramfs-zfs-temp/sbin/"
+	mkdir -p "${TEMP}/initramfs-zfs-temp/etc/zfs/"
+	
+	for f in zfs zpool zpool_layout zpool_id zvol_id mount.zfs hostid
+	do
+		print_info 2 "          ZFS: >> Installing $f"
+		instd $f "${TEMP}/initramfs-zfs-temp/" || gen_die "          ZFS: >> Unable to install $f"
+	done
+  
+	# Copy over a cache if we have one.
+	[ -f /etc/zfs/zpool.cache ] && cp /etc/zfs/zpool.cache "${TEMP}/initramfs-zfs-temp/etc/zfs/"
+
+	cd "${TEMP}/initramfs-zfs-temp/"
+	find . -print | cpio ${CPIO_ARGS} --append -F "${CPIO}" || gen_die "compressing zfs cpio"
+	cd "${TEMP}"
+	rm -r "${TEMP}/initramfs-zfs-temp/"
+}
+
 append_lvm(){
 	if [ -d "${TEMP}/initramfs-lvm-temp" ]
 	then
@@ -673,6 +701,7 @@ create_initramfs() {
 	append_data 'base_layout'
 	append_data 'auxilary' "${BUSYBOX}"
 	append_data 'busybox' "${BUSYBOX}"
+	append_data 'zfs' "${ZFS}"
 	append_data 'lvm' "${LVM}"
 	append_data 'dmraid' "${DMRAID}"
 	append_data 'iscsi' "${ISCSI}"

@@ -240,6 +240,9 @@ INITIALIZATION
     Add in EVMS support from static binaries if they exist on the system:
     you should run "emerge evms" first (in the host system).
 
+*--zfs*::
+		Add support for ZFS root with real_root detection from bootfs attributes.
+
 *--lvm*::
     Add in LVM support from static binaries if they exist on the
     system,  or compile static LVM binaries if static ones do not
@@ -413,6 +416,10 @@ which the ramdisk scripts would recognize.
     If present,  the initrd will try to mount a livecd from that
     location. Otherwise the location will be deduced from the DCHP
     request (option root-path)
+
+*dozfs*::
+		Activate ZFS volumes on bootup and detect real_root from bootfs
+		attribute on importable pools.
 
 *doevms*::
     Activate EVMS volumes on bootup

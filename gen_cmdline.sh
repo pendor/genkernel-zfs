@@ -78,6 +78,7 @@ longusage() {
   echo "	--evms			Include EVMS support"
   echo "				--> 'emerge evms' in the host operating system"
   echo "				first"
+  echo "	--zfs			Include ZFS support"
   echo "	--lvm			Include LVM support"
   echo "	--mdadm			Include MDADM/MDMON support"
   echo "	--mdadm-config=<file>	Use file as mdadm.conf in initramfs"
@@ -234,6 +235,10 @@ parse_cmdline() {
 			echo
 			print_warning 1 "Please use --evms, as --evms2 is deprecated."
 			;;
+		--zfs)
+			CMD_ZFS=1
+			print_info 2 "CMD_ZFS: ${CMD_ZFS}"
+		  ;;
 		--lvm)
 			CMD_LVM=1
 			print_info 2 "CMD_LVM: ${CMD_LVM}"

@@ -107,6 +107,7 @@ determine_real_args() {
  	set_config_with_override 1 SYMLINK              CMD_SYMLINK
 	set_config_with_override 2 INSTALL_MOD_PATH     CMD_INSTALL_MOD_PATH
 	set_config_with_override 1 OLDCONFIG            CMD_OLDCONFIG
+	set_config_with_override 1 ZFS                  CMD_ZFS
 	set_config_with_override 1 LVM                  CMD_LVM
 	set_config_with_override 1 EVMS                 CMD_EVMS
 	set_config_with_override 1 DMRAID               CMD_DMRAID
