@@ -235,19 +235,25 @@ append_iscsi(){
 }
 
 append_zfs(){
+  [ -f /etc/zfs/hostid ] || gen_die "          ZFS: >> No /etc/zfs/hostid found"
+
 	if [ -d "${TEMP}/initramfs-zfs-temp" ]
 	then
 		rm -r "${TEMP}/initramfs-zfs-temp/"
 	fi
 	
 	print_info 1 '          ZFS: Adding support using local binaries w/ dylibs'
-	
+  
 	cd ${TEMP}
 	mkdir -p "${TEMP}/initramfs-zfs-temp/bin/"
+	mkdir -p "${TEMP}/initramfs-zfs-temp/etc/"
 	mkdir -p "${TEMP}/initramfs-zfs-temp/sbin/"
 	mkdir -p "${TEMP}/initramfs-zfs-temp/etc/zfs/"
-	
-	for f in zfs zpool zpool_layout zpool_id zvol_id mount.zfs hostid
+
+	cp /etc/zfs/hostid "${TEMP}/initramfs-zfs-temp/etc/zfs/"
+	chmod +x "${TEMP}/initramfs-zfs-temp/etc/zfs/hostid"
+  
+	for f in zfs zpool zpool_layout zpool_id zvol_id mount.zfs
 	do
 		print_info 2 "          ZFS: >> Installing $f"
 		instd $f "${TEMP}/initramfs-zfs-temp/" || gen_die "          ZFS: >> Unable to install $f"
@@ -255,7 +261,7 @@ append_zfs(){
   
 	# Copy over a cache if we have one.
 	[ -f /etc/zfs/zpool.cache ] && cp /etc/zfs/zpool.cache "${TEMP}/initramfs-zfs-temp/etc/zfs/"
-
+	
 	cd "${TEMP}/initramfs-zfs-temp/"
 	find . -print | cpio ${CPIO_ARGS} --append -F "${CPIO}" || gen_die "compressing zfs cpio"
 	cd "${TEMP}"
