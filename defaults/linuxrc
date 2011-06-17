@@ -482,13 +482,14 @@ do
 			  ;;
 			  "")
   			  # No real_root set, so try to find it from bootfs attribute.
-    			good_msg "ZFS: Attempting to detect real_root from importable ZFS pools."
+    			good_msg "ZFS: Attempting to detect real_root from imported ZFS pools."
           
           # Might be imported from the cache, so try first.
     			zfsbootfs=`/sbin/zpool list -H -o bootfs | /bin/grep -v ^-$ -m 1`
     			if [ "x$zfsbootfs" = 'x' ]
     			then
     			  # Not there, so we need to import everything.
+    			  good_msg "ZFS: Attempting to import additional pools."
     			  /sbin/zpool import -N -a
     			  zfsbootfs=`/sbin/zpool list -H -o bootfs | /bin/grep -v ^-$ -m 1`
   			  fi
