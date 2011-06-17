@@ -475,7 +475,7 @@ do
 					if [ "$?" -eq "1" ]
 					then
 					  # pool wasn't imported from zcache, so try it manually.
-					  /sbin/zpool import -f -N $pool || { bad_msg "ZFS: Unable to import root pool '${pool}'." ; continue ; }
+					  /sbin/zpool import -N $pool || { bad_msg "ZFS: Unable to import root pool '${pool}'." ; continue ; }
 				  fi    			
     			REAL_ROOT="${zfsbootfs}"
     			good_msg "ZFS: Using ${zfsbootfs} as real_root."
@@ -483,9 +483,16 @@ do
 			  "")
   			  # No real_root set, so try to find it from bootfs attribute.
     			good_msg "ZFS: Attempting to detect real_root from importable ZFS pools."
-    			/sbin/zpool import -f -N -a
+          
+          # Might be imported from the cache, so try first.
     			zfsbootfs=`/sbin/zpool list -H -o bootfs | /bin/grep -v ^-$ -m 1`
-  			
+    			if [ "x$zfsbootfs" = 'x' ]
+    			then
+    			  # Not there, so we need to import everything.
+    			  /sbin/zpool import -N -a
+    			  zfsbootfs=`/sbin/zpool list -H -o bootfs | /bin/grep -v ^-$ -m 1`
+  			  fi
+  			  
     			if [ "x$zfsbootfs" = 'x' ]
     			then
     			  pool=""
