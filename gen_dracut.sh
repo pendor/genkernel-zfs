@@ -30,7 +30,7 @@ dracut_modules() {
 }
 
 create_initramfs() {
-	local tmprd="${TMPDIR}/initramfs-${KV}" opts='-f -L=3 -M' add_files=()
+	local tmprd="${TMPDIR}/initramfs-${KV}" opts="-f -L=`expr ${LOGLEVEL} + 1` -M" add_files=()
 
 	print_info 1 'initramfs: >> Initializing Dracut...'
 
