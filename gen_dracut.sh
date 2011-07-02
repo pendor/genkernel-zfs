@@ -3,7 +3,7 @@
 
 BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
 BASIC_MODULES+=\ udev-rules\ base
-MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ crypt-gpg\ multipath\ plymouth\ gensplash
+MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ crypt-gpg\ multipath\ plymouth\ gensplash\ zfs
 
 strstr() {
     [[ $1 =~ $2 ]]
@@ -72,16 +72,20 @@ create_initramfs() {
 		print_info 1 "           >> DRACUT_GENSPLASH_RES=${GENSPLASH_RES}"
 	fi
 	print_info 1 "           >> dracut ${opts} '${tmprd}' '${KV}'"
+	rm -f ${TMPDIR}/drac.failed
 	if [[ ${DRACUT_DIR} ]]; then
 		cd "${DRACUT_DIR}"
-		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\'
+		eval ./dracut ${opts} \'${tmprd}\' \'${KV}\' || touch ${TMPDIR}/drac.failed
 		cd - >/dev/null
 	else
-		eval dracut ${opts} \'${tmprd}\' \'${KV}\' | while read module; do
-			[[ \ $MODULES\  =~ \ $module\  ]] && \
-				module="${BOLD}${module}${NORMAL}"
+		eval dracut ${opts} \'${tmprd}\' \'${KV}\' || touch ${TMPDIR}/drac.failed \
+		  | while read module; do
+			[[ \ $MODULES\  =~ \ $module\  ]] && module="${BOLD}${module}${NORMAL}"
 			print_info 1 "              >> Including module: $module"
 		done
+	fi
+	if [ -f ${TMPDIR}/drac.failed ] ; then
+	  gen_die "Running Dracut failed."
 	fi
 
 	if isTrue "${INTEGRATED_INITRAMFS}"

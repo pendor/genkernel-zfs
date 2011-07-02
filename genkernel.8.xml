@@ -590,6 +590,12 @@
                             <para>Include RAID support via <package>mdadm</package>.</para>
                         </listitem>
                     </varlistentry>
+										<varlistentry>
+                        <term><option>--zfs</option></term>
+                        <listitem>
+                            <para>Include ZFS support via <package>sys-fs/zfs</package>.</para>
+                        </listitem>
+                    </varlistentry>
                     <varlistentry>
                         <term><option>--multipath</option></term>
                         <listitem>

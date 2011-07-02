@@ -113,6 +113,7 @@ longusage() {
   echo "	--iscsi			Include iSCSI support"
   echo "	--lvm			Include LVM support"
   echo "	--mdraid		Include RAID support via mdadm"
+  echo "	--zfs			Include ZFS support"
   echo "	--multipath		Include Multipath support"
   echo "	--no-fbsplash		Do not install framebuffer splash"
   echo "	--plymouth		Enable EXPERIMENTAL Plymouth splash; set up"
@@ -470,6 +471,9 @@ parse_cmdline() {
 		--mdadmconf)
 			CMD_MDRAID_CONFIG=1
 			print_info 2 "CMD_MDRAID_CONFIG: ${CMD_MDRAID_CONFIG}"
+		--zfs)
+			CMD_ZFS=1
+			print_info 2 "CMD_ZFS: ${CMD_ZFS}"
 			;;
 		--multipath)
 			if [ ! -e /usr/include/libdevmapper.h ]
