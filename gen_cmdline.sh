@@ -467,6 +467,10 @@ parse_cmdline() {
 			CMD_MDRAID=1
 			print_info 2 "CMD_MDRAID: ${CMD_MDRAID}"
 			;;
+		--mdadmconf)
+			CMD_MDRAID_CONFIG=1
+			print_info 2 "CMD_MDRAID_CONFIG: ${CMD_MDRAID_CONFIG}"
+			;;
 		--multipath)
 			if [ ! -e /usr/include/libdevmapper.h ]
 			then

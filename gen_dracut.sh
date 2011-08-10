@@ -5,6 +5,10 @@ BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
 BASIC_MODULES+=\ udev-rules\ base
 MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ crypt-gpg\ multipath\ plymouth\ gensplash
 
+strstr() {
+    [[ $1 =~ $2 ]]
+}
+
 dracut_modules() {
 	local a=() o=()
 
@@ -53,6 +57,12 @@ create_initramfs() {
 	[[ ${add_files[*]} ]] && opts+=" -I '${add_files[*]}'"
 	opts+=" ${EXTRA_OPTIONS}"
 	opts+=" $(dracut_modules)"
+
+    if strstr "${opts}" " mdraid "
+    then
+        isTrue "${MDRAID_CONFIG}" && opts+=\ --mdadmconf || \
+            opts+=\ --nomdadmconf
+    fi
 
 	if isTrue "${GENSPLASH}"
 	then

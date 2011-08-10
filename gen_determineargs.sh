@@ -69,6 +69,7 @@ determine_real_args() {
 	print_info 4 "Resolving config file, command line, and arch default settings."
 
 	set_config_alias MDADM MDRAID
+	set_config_alias MDADM_CONFIG MDRAID_CONFIG
 	set_config_alias LUKS CRYPT
 	set_config_alias GPG CRYPT_GPG
 	set_config_alias SPLASH GENSPLASH
@@ -121,6 +122,7 @@ determine_real_args() {
 	set_config_with_override BOOL   GENERIC              CMD_GENERIC
 	set_config_with_override STRING DRACUT_DIR           CMD_DRACUT_DIR
 	set_config_with_override BOOL   MDRAID               CMD_MDRAID
+	set_config_with_override BOOL   MDRAID_CONFIG        CMD_MDRAID_CONFIG
 	set_config_with_override BOOL   CRYPT                CMD_CRYPT
 	set_config_with_override BOOL   CRYPT_GPG            CMD_CRYPT_GPG
 	set_config_with_override BOOL   PLYMOUTH             CMD_PLYMOUTH
