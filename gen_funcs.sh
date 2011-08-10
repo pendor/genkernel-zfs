@@ -445,7 +445,7 @@ set_config_with_override() {
 	# Syntax check the function arguments.
 	#
 	case "$VarType" in
-		1|2)
+		BOOL|STRING)
 			;;
 		*)
 			gen_die "Illegal variable type \"$VarType\" passed to set_config_with_override()."
@@ -481,7 +481,7 @@ set_config_with_override() {
 		fi
 	fi
 
-	if [ "${VarType}" = "1" ]
+	if [ "${VarType}" = BOOL ]
 	then
 		if isTrue "${Result}"
 		then

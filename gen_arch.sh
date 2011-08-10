@@ -35,7 +35,10 @@ set_kernel_arch() {
 	KERNEL_ARCH=${ARCH}
 	case ${ARCH} in
 		ppc|ppc64)
-			if [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ]
+			if [ "${VER}" -ge "3" ]
+			then
+					KERNEL_ARCH=powerpc
+			elif [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ]
 			then
 				if [ "${PAT}" -eq "6" -a "${SUB}" -ge "16" ] || [ "${PAT}" -gt "6" ]
 				then
@@ -44,7 +47,10 @@ set_kernel_arch() {
 			fi
 			;;
 		x86)
-			if [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ] || [ "${VER}" -gt "2" ]
+			if [ "${VER}" -ge "3" ]
+			then
+					KERNEL_ARCH=x86
+			elif [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ] || [ "${VER}" -gt "2" ]
 			then
 				if [ "${PAT}" -eq "6" -a "${SUB}" -ge "24" ] || [ "${PAT}" -gt "6" ]
 				then
@@ -55,7 +61,10 @@ set_kernel_arch() {
 			fi
 			;;
 		x86_64)
-			if [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ] || [ "${VER}" -gt "2" ]
+			if [ "${VER}" -ge "3" ]
+			then
+					KERNEL_ARCH=x86
+			elif [ "${VER}" -eq "2" -a "${PAT}" -ge "6" ] || [ "${VER}" -gt "2" ]
 			then
 				if [ "${PAT}" -eq "6" -a "${SUB}" -ge "24" ] || [ "${PAT}" -gt "6" ]
 				then

@@ -178,6 +178,14 @@ parse_cmdline() {
 			CMD_KERNEL_MAKE=`parse_opt "$*"`
 			print_info 2 "CMD_KERNEL_MAKE: ${CMD_KERNEL_MAKE}"
 			;;
+		--kernel-target=*)
+			KERNEL_MAKE_DIRECTIVE_OVERRIDE=`parse_opt "$*"`
+			print_info 2 "KERNEL_MAKE_DIRECTIVE_OVERRIDE: ${KERNEL_MAKE_DIRECTIVE_OVERRIDE}"
+			;;
+		--kernel-binary=*)
+			KERNEL_BINARY_OVERRIDE=`parse_opt "$*"`
+			print_info 2 "KERNEL_BINARY_OVERRIDE: ${KERNEL_BINARY_OVERRIDE}"
+			;;
 		--kernel-cross-compile=*)
 			CMD_KERNEL_CROSS_COMPILE=`parse_opt "$*"`
 			CMD_KERNEL_CROSS_COMPILE=$(echo ${CMD_KERNEL_CROSS_COMPILE}|sed -e 's/.*[^-]$/&-/g')

@@ -157,27 +157,30 @@ compile_generic() {
 	local target=${1}
 	local argstype=${2}
 
-	if [ "${argstype}" = 'kernel' ] || [ "${argstype}" = 'runtask' ]
-	then
-		export_kernel_args
-		MAKE=${KERNEL_MAKE}
-	elif [ "${2}" = 'utils' ]
-	then
-		export_utils_args
-		MAKE=${UTILS_MAKE}
-	fi
 	case "${argstype}" in
-		kernel) ARGS="`compile_kernel_args`" ;;
+		kernel|kernelruntask)
+			export_kernel_args
+			MAKE=${KERNEL_MAKE}
+			;;
+		utils)
+			export_utils_args
+			MAKE=${UTILS_MAKE}
+			;;
+	esac
+
+	case "${argstype}" in
+		kernel|kernelruntask) ARGS="`compile_kernel_args`" ;;
 		utils) ARGS="`compile_utils_args`" ;;
-		*) ARGS="" ;; # includes runtask
+		*) ARGS="" ;;
 	esac
 	shift 2
 
 	# the eval usage is needed in the next set of code
 	# as ARGS can contain spaces and quotes, eg:
 	# ARGS='CC="ccache gcc"'
-	if [ "${argstype}" == 'runtask' ]
+	if [ "${argstype}" == 'kernelruntask' ]
 	then
+		# Silent operation, forced -j1
 		print_info 2 "COMMAND: ${MAKE} ${MAKEOPTS} -j1 ${ARGS} ${target} $*" 1 0 1
 		eval ${MAKE} -s ${MAKEOPTS} -j1 "${ARGS}" ${target} $*
 		RET=$?
@@ -198,13 +201,11 @@ compile_generic() {
 
 	unset MAKE
 	unset ARGS
-	if [ "${argstype}" = 'kernel' ]
-	then
-		unset_kernel_args
-	elif [ "${argstype}" = 'utils' ]
-	then
-		unset_utils_args
-	fi
+
+	case "${argstype}" in
+		kernel) unset_kernel_args ;;
+		utils) unset_utils_args ;;
+	esac
 }
 
 compile_modules() {
@@ -221,8 +222,12 @@ compile_kernel() {
 	[ "${KERNEL_MAKE}" = '' ] &&
 		gen_die "KERNEL_MAKE undefined - I don't know how to compile a kernel for this arch!"
 	cd ${KERNEL_DIR}
-	print_info 1 "        >> Compiling ${KV} ${KERNEL_MAKE_DIRECTIVE/_install/ [ install ]/}..."
-	compile_generic "${KERNEL_MAKE_DIRECTIVE}" kernel
+	local kernel_make_directive="${KERNEL_MAKE_DIRECTIVE}"
+	if [ "${KERNEL_MAKE_DIRECTIVE_OVERRIDE}" != "${DEFAULT_KERNEL_MAKE_DIRECTIVE_OVERRIDE}" ]; then
+		kernel_make_directive="${KERNEL_MAKE_DIRECTIVE_OVERRIDE}"
+	fi
+	print_info 1 "        >> Compiling ${KV} ${kernel_make_directive/_install/ [ install ]/}..."
+	compile_generic "${kernel_make_directive}" kernel
 	if [ "${KERNEL_MAKE_DIRECTIVE_2}" != '' ]
 	then
 		print_info 1 "        >> Starting supplimental compile of ${KV}: ${KERNEL_MAKE_DIRECTIVE_2}..."
@@ -238,7 +243,7 @@ compile_kernel() {
 		print_info 1 "        >> Not installing firmware as it's included in the kernel already (CONFIG_FIRMWARE_IN_KERNEL=y)..."
 	fi
 
-	local tmp_kernel_binary=$(find_kernel_binary ${KERNEL_BINARY})
+	local tmp_kernel_binary=$(find_kernel_binary ${KERNEL_BINARY_OVERRIDE:-${KERNEL_BINARY}})
 	local tmp_kernel_binary2=$(find_kernel_binary ${KERNEL_BINARY_2})
 	if [ -z "${tmp_kernel_binary}" ]
 	then
