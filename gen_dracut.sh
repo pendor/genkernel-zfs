@@ -3,19 +3,19 @@
 
 BASIC_MODULES=dash\ i18n\ kernel-modules\ resume\ rootfs-block\ terminfo
 BASIC_MODULES+=\ udev-rules\ base
-MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ multipath\ plymouth\ gensplash
+MODULES=lvm\ dmraid\ iscsi\ mdraid\ crypt\ crypt-gpg\ multipath\ plymouth\ gensplash
 
 dracut_modules() {
 	local a=() o=()
 
 	isTrue "${PLYMOUTH}" && isTrue "${GENSPLASH}" && gen_die 'Framebuffer Splash and Plymouth selected!  You cannot choose both splash engines.'
-	isTrue "${EVMS}" && gen_die 'EVMS is no longer supported.  If you *really* need it, file a bug report and we bring it back to life.'
 	isTrue "${UNIONFS}" && gen_die 'UnionFS not yet supported.'
 
 	for var in ${MODULES}
 	do
-		var="${var^^}"
-		isTrue "${!var}" && a+=(${var,,})
+		opt="${var^^}"
+        opt="${opt//-/_}"
+		isTrue "${!opt}" && a+=(${var})
 	done
 
 	a+=(${ADD_MODULES})

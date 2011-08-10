@@ -70,6 +70,7 @@ longusage() {
   echo "				specifying modules by hand"
   echo "	--crypt			Include LUKS support"
   echo "				--> 'emerge cryptsetup'"
+  echo "    --gpg       Include GPG-armored LUKS key support"
   echo "	--no-ramdisk-modules	Don't copy any modules to the ramdisk"
   echo "	--dmraid		Include DMRAID support"
   echo "	--dracut-dir=<dir>	Directory of Dracut sources; if given Dracut"
@@ -383,6 +384,10 @@ parse_cmdline() {
 			CMD_CRYPT=1
 			print_info 2 "CMD_CRYPT: ${CMD_CRYPT}"
 			;;
+	    --gpg|--crypt-gpg)
+	        CMD_CRYPT_GPG=1
+	        print_info 2 "CMD_CRYPT_GPG: ${CMD_CRYPT_GPG}"
+            ;;
 		--dmraid)
 			if [ ! -e /usr/include/libdevmapper.h ]
 			then

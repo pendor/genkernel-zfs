@@ -70,6 +70,7 @@ determine_real_args() {
 
 	set_config_alias MDADM MDRAID
 	set_config_alias LUKS CRYPT
+	set_config_alias GPG CRYPT_GPG
 	set_config_alias SPLASH GENSPLASH
 	set_config_alias FBSPLASH GENSPLASH
 
@@ -121,6 +122,7 @@ determine_real_args() {
 	set_config_with_override STRING DRACUT_DIR           CMD_DRACUT_DIR
 	set_config_with_override BOOL   MDRAID               CMD_MDRAID
 	set_config_with_override BOOL   CRYPT                CMD_CRYPT
+	set_config_with_override BOOL   CRYPT_GPG            CMD_CRYPT_GPG
 	set_config_with_override BOOL   PLYMOUTH             CMD_PLYMOUTH
 	set_config_with_override BOOL   GENSPLASH            CMD_GENSPLASH
 	set_config_with_override STRING ADD_MODULES          CMD_ADD_MODULES
