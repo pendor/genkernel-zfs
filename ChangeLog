@@ -5,6 +5,54 @@
 # Distributed under the GPL v2
 # $Id$
 
+  08 Oct 2011; Fabio Erculiani <lxnay@gentoo.org> defaults/initrd.defaults,
+  defaults/initrd.scripts, defaults/linuxrc:
+  Do not hardcode /mnt/cdrom path across the whole code, use CDROOT_PATH
+  instead. At the same time, mount cdrom into /mnt/cdrom instead of
+  /newroot/mnt/cdrom (which is now just a bind mount), this avoids
+  losetup to expose unavailable paths inside the live system, breaking
+  mkfs.btrfs (next upstream version, which does silly things with
+  /proc/mounts).
+
+  07 Oct 2011; Robin H. Johnson <robbat2@gentoo.org>
+  patches/busybox/1.18.1/1.18.1-mdstart.diff:
+  Fix patch typo that broke compile.
+
+  22 Sept 2011; Robin H. Johnson <robbat2@gentoo.org> defaults/initrd.scripts,
+  defaults/linuxrc:
+  Fix trailing backtick and root-on-LVM.
+
+  13 Sep 2011; Fabio Erculiani <lxnay@gentoo.org> gen_compile.sh,
+  gen_initramfs.sh:
+  dmraid requires dmsetup to assign UUID to discovered RAID volumes, close bug
+  #382555
+
+  11 Sep 2011; Fabio Erculiani <lxnay@gentoo.org> defaults/initrd.scripts,
+  defaults/linuxrc:
+  drop parse_opt usage and crufty, deprecated subshelling through 
+
+  30 Aug 2011; Sebastian Pipping <sping@gentoo.org> defaults/initrd.scripts:
+  Fix quoting issue (bug #380729).
+
+  Thanks to:
+  - Axel Bringenberg
+
+  30 Aug 2011; Sebastian Pipping <sping@gentoo.org>
+  +patches/mdadm/3.1.4/mdadm-3.1.4-z-now.patch, gen_compile.sh:
+  Enable patch application for mdadm, add patch to fix compilation (bug
+  #381089)
+
+  28 Aug 2011; Fabio Erculiani <lxnay@gentoo.org> defaults/initrd.scripts,
+  defaults/linuxrc, doc/genkernel.8.txt:
+  Add basic support to AUFS2, requires kernel with aufs module or built-in
+
+  16 Aug 2011; Fabio Erculiani <lxnay@gentoo.org> gen_compile.sh:
+  gen_compile: correct MAKEOPTS usage on utils task
+
+  16 Aug 2011; Fabio Erculiani <lxnay@gentoo.org> gen_compile.sh:
+  gen_compile: always use -j1 with kernel *_install targets, fixes compilation
+  with make 3.82
+
   06 Aug 2011; Sebastian Pipping <sping@gentoo.org> gen_initramfs.sh:
   No longer copy /lib/libsysfs*so* for multipath-tools (bug #300841, bug
   #377709)
