@@ -471,6 +471,7 @@ parse_cmdline() {
 		--mdadmconf)
 			CMD_MDRAID_CONFIG=1
 			print_info 2 "CMD_MDRAID_CONFIG: ${CMD_MDRAID_CONFIG}"
+			;;
 		--zfs)
 			CMD_ZFS=1
 			print_info 2 "CMD_ZFS: ${CMD_ZFS}"
